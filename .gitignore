@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+
+# Virtual Environment
+attendance_app/
+attendance_app/*
+env/
+*.env
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VSCode / IDE settings (optional)
+.vscode/
+.idea/
+
+# Pytest / coverage reports
+htmlcov/
+.coverage
+.pytest_cache/
+
+# Flask secret config files (if any)
+instance/
+*.sqlite3
+
+# CSV / exported files (if you generate them dynamically)
+*.csv
