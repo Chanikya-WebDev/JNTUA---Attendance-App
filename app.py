@@ -3,8 +3,9 @@ import os
 from flask import Flask, render_template, request
 from attendance_scraper import login, get_student_details, get_subjects, fetch_attendance
 
+# Initialize Flask app
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me-in-prod")
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "your-secret-key-here")
 
 @app.route('/')
 def index():
@@ -12,10 +13,17 @@ def index():
 
 @app.route('/check', methods=['POST'])
 def check_attendance():
-    username = request.form['username']
-    password = request.form['password']
+    username = request.form.get('username', '').strip()
+    password = request.form.get('password', '').strip()
+    
+    # Basic validation
+    if not username or not password:
+        return render_template('error.html', 
+                             error_message="Please provide both username and password.",
+                             back_url="/")
     
     try:
+        # Login and fetch data
         session = login(username, password)
         details = get_student_details(session)
         subjects = get_subjects(session, details)
@@ -32,9 +40,35 @@ def check_attendance():
                              total_days=total_days, 
                              total_present=total_present,
                              overall_attendance_pct=overall_attendance_pct)
+                             
+    except ValueError as e:
+        # Login failed or validation error
+        return render_template('error.html', 
+                             error_message=str(e),
+                             back_url="/")
+                             
     except Exception as e:
-        return f"<h3>Error: {str(e)}</h3><a href='/'>← Back to Login</a>"
+        # Other errors (network, parsing, etc.)
+        return render_template('error.html', 
+                             error_message=f"An error occurred while fetching attendance data: {str(e)}",
+                             back_url="/")
 
-# Only for local dev
+@app.errorhandler(404)
+def not_found(error):
+    return render_template('error.html', 
+                         error_message="Page not found.",
+                         back_url="/"), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('error.html', 
+                         error_message="Internal server error. Please try again later.",
+                         back_url="/"), 500
+
+# For Vercel deployment
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)), debug=False)
+    app.run(debug=False)
+
+# Vercel serverless function handler
+def handler(request):
+    return app(request.environ, lambda status, headers: None)
