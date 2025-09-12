@@ -1,105 +1,69 @@
-import requests
-from bs4 import BeautifulSoup
-from datetime import datetime
-
-BASE_URL = "https://jntuaceastudents.classattendance.in/"
-
-def login(username: str, password: str) -> requests.Session:
-    session = requests.Session()
-    login_page = session.get(BASE_URL)
-    soup = BeautifulSoup(login_page.text, "html.parser")
-    secretcode = soup.find("input", {"name": "secretcode"})["value"]
-    
-    payload = {"username": username, "password": password, "secretcode": secretcode}
-    res = session.post(BASE_URL, data=payload)
-    
-    if "studenthome.php" not in res.url:
-        raise ValueError("Login failed. Check username/password.")
-    
-    return session
-
-def get_student_details(session: requests.Session) -> dict:
-    home_res = session.get(BASE_URL + "studenthome.php")
-    soup = BeautifulSoup(home_res.text, "html.parser")
-    
-    details = {}
-    for card in soup.find_all("div", class_="card"):
-        header = card.find("div", class_="card-header")
-        if header and "My Details" in header.get_text(strip=True):
-            for li in card.find_all("li", class_="list-group-item"):
-                key = li.find("strong").get_text(strip=True).replace(":", "")
-                value = li.get_text(strip=True).replace(li.find("strong").get_text(), "").strip()
-                details[key] = value
-            break
-    
-    details["student_id"] = soup.find("input", {"name": "student_id"})["value"]
-    details["class_id"] = soup.find("input", {"name": "class_id"})["value"]
-    details["classname"] = soup.find("input", {"name": "classname"})["value"]
-    details["acad_year"] = soup.find("input", {"name": "acad_year"})["value"]
-    
-    return details
-
-def get_subjects(session: requests.Session, student_info: dict) -> list:
-    payload = {
-        "student_id": student_info["student_id"],
-        "class_id": student_info["class_id"],
-        "classname": student_info["classname"],
-        "acad_year": student_info["acad_year"]
-    }
-    res = session.post(BASE_URL + "studentsubjects.php", data=payload)
-    soup = BeautifulSoup(res.text, "html.parser")
-    
-    subjects = []
-    for form in soup.find_all("form", {"id": True}):
-        subject_data = {}
-        for inp in form.find_all("input", {"type": "hidden"}):
-            subject_data[inp["name"]] = inp.get("value", "")
-        subjects.append(subject_data)
-    
-    return subjects
-
-class SimpleDataFrame:
-    """Simple DataFrame-like class to replace pandas functionality"""
-    def __init__(self, data):
-        self.data = data
-    
-    def to_dict(self, orient="records"):
-        if orient == "records":
-            return self.data
-        return self.data
-    
-    def __getitem__(self, key):
-        return [row[key] for row in self.data]
-    
-    def sum_column(self, column):
-        # Only sum numeric values, skip "N/A" or non-numeric entries
-        return sum(row[column] for row in self.data if isinstance(row[column], (int, float)))
-
 def fetch_attendance(session: requests.Session, subjects: list):
+    """
+    Fetch attendance for all subjects.
+    Returns a SimpleDataFrame with summary per subject.
+    """
     all_summaries = []
 
     for att_payload in subjects:
-        att_res = session.post(BASE_URL + "studentsubatt.php", data=att_payload)
+        subject_name = att_payload.get("sub_fullname", "Unknown")
+
+        try:
+            att_res = session.post(BASE_URL + "studentsubatt.php", data=att_payload)
+        except Exception as e:
+            # If network fails, still add placeholder entry
+            all_summaries.append({
+                "Subject": subject_name,
+                "Start Date": "N/A",
+                "End Date": "N/A",
+                "Total Days": 0,
+                "No. of Present": 0,
+                "No. of Absent": 0,
+                "Attendance %": 0,
+                "Note": f"Fetch error: {e}"
+            })
+            continue
+
         soup = BeautifulSoup(att_res.text, "html.parser")
         table = soup.find("table", class_="table table-bordered table-striped")
-        
+
+        # Case 1: No attendance table
         if not table:
+            all_summaries.append({
+                "Subject": subject_name,
+                "Start Date": "N/A",
+                "End Date": "N/A",
+                "Total Days": 0,
+                "No. of Present": 0,
+                "No. of Absent": 0,
+                "Attendance %": 0,
+                "Note": "No attendance table"
+            })
             continue
-        
+
+        # Case 2: Parse attendance rows
         records = []
         for row in table.select("tbody tr"):
-            cols = row.find_all("td")
-            if not cols:
-                continue
-            records.append((cols[0].get_text(strip=True), cols[2].get_text(strip=True)))
-        
+            cols = [td.get_text(strip=True) for td in row.find_all("td")]
+            if len(cols) >= 3:   # Ensure we have enough columns
+                date_str, status = cols[0], cols[2]
+                records.append((date_str, status))
+
         if not records:
+            all_summaries.append({
+                "Subject": subject_name,
+                "Start Date": "N/A",
+                "End Date": "N/A",
+                "Total Days": 0,
+                "No. of Present": 0,
+                "No. of Absent": 0,
+                "Attendance %": 0,
+                "Note": "No records"
+            })
             continue
-        
-        # Process dates and calculate statistics
-        dates = []
-        statuses = []
-        
+
+        # Extract dates + statuses
+        dates, statuses = [], []
         for date_str, status in records:
             try:
                 date_obj = datetime.strptime(date_str, "%d-%m-%Y")
@@ -107,25 +71,35 @@ def fetch_attendance(session: requests.Session, subjects: list):
                 statuses.append(status)
             except ValueError:
                 continue
-        
+
         if not dates:
+            all_summaries.append({
+                "Subject": subject_name,
+                "Start Date": "N/A",
+                "End Date": "N/A",
+                "Total Days": 0,
+                "No. of Present": 0,
+                "No. of Absent": 0,
+                "Attendance %": 0,
+                "Note": "Invalid dates"
+            })
             continue
-        
-        # Calculate summary statistics
+
+        # Summary stats
         total_days = len(statuses)
-        present_count = sum(1 for status in statuses if status == "Present")
+        present_count = sum(1 for s in statuses if s.lower() == "present")
         absent_count = total_days - present_count
-        attendance_pct = round((present_count / total_days) * 100, 2) if total_days > 0 else 0
-        
-        summary = {
-            "Subject": att_payload.get("sub_fullname", "Unknown"),
+        attendance_pct = round((present_count / total_days) * 100, 2) if total_days else 0
+
+        all_summaries.append({
+            "Subject": subject_name,
             "Start Date": min(dates).strftime("%d-%m-%Y"),
             "End Date": max(dates).strftime("%d-%m-%Y"),
             "Total Days": total_days,
             "No. of Present": present_count,
             "No. of Absent": absent_count,
-            "Attendance %": attendance_pct
-        }
-        all_summaries.append(summary)
-    
+            "Attendance %": attendance_pct,
+            "Note": "OK"
+        })
+
     return SimpleDataFrame(all_summaries)
