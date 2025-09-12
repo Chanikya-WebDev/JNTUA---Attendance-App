@@ -33,3 +33,4 @@ instance/
 
 # CSV / exported files (if you generate them dynamically)
 *.csv
+.vercel
