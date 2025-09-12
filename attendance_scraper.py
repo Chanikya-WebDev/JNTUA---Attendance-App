@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-import pandas as pd
+from datetime import datetime
 
 BASE_URL = "https://jntuaceastudents.classattendance.in/"
 
@@ -58,7 +58,24 @@ def get_subjects(session: requests.Session, student_info: dict) -> list:
     
     return subjects
 
-def fetch_attendance(session: requests.Session, subjects: list) -> pd.DataFrame:
+class SimpleDataFrame:
+    """Simple DataFrame-like class to replace pandas functionality"""
+    def __init__(self, data):
+        self.data = data
+    
+    def to_dict(self, orient="records"):
+        if orient == "records":
+            return self.data
+        return self.data
+    
+    def __getitem__(self, key):
+        return [row[key] for row in self.data]
+    
+    def sum_column(self, column):
+        # Only sum numeric values, skip "N/A" or non-numeric entries
+        return sum(row[column] for row in self.data if isinstance(row[column], (int, float)))
+
+def fetch_attendance(session: requests.Session, subjects: list):
     all_summaries = []
 
     for att_payload in subjects:
@@ -79,18 +96,36 @@ def fetch_attendance(session: requests.Session, subjects: list) -> pd.DataFrame:
         if not records:
             continue
         
-        df = pd.DataFrame(records, columns=["Date", "Status"])
-        df["Date"] = pd.to_datetime(df["Date"], format="%d-%m-%Y")
+        # Process dates and calculate statistics
+        dates = []
+        statuses = []
+        
+        for date_str, status in records:
+            try:
+                date_obj = datetime.strptime(date_str, "%d-%m-%Y")
+                dates.append(date_obj)
+                statuses.append(status)
+            except ValueError:
+                continue
+        
+        if not dates:
+            continue
+        
+        # Calculate summary statistics
+        total_days = len(statuses)
+        present_count = sum(1 for status in statuses if status == "Present")
+        absent_count = total_days - present_count
+        attendance_pct = round((present_count / total_days) * 100, 2) if total_days > 0 else 0
         
         summary = {
             "Subject": att_payload.get("sub_fullname", "Unknown"),
-            "Start Date": df["Date"].min().strftime("%d-%m-%Y"),
-            "End Date": df["Date"].max().strftime("%d-%m-%Y"),
-            "Total Days": len(df),
-            "No. of Present": (df["Status"] == "Present").sum(),
-            "No. of Absent": (df["Status"] == "Absent").sum(),
-            "Attendance %": round((df["Status"] == "Present").sum() / len(df) * 100, 2)
+            "Start Date": min(dates).strftime("%d-%m-%Y"),
+            "End Date": max(dates).strftime("%d-%m-%Y"),
+            "Total Days": total_days,
+            "No. of Present": present_count,
+            "No. of Absent": absent_count,
+            "Attendance %": attendance_pct
         }
         all_summaries.append(summary)
     
-    return pd.DataFrame(all_summaries)
+    return SimpleDataFrame(all_summaries)

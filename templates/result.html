@@ -15,6 +15,13 @@
         tr:nth-child(even) { background: #f9f9f9; }
         .overall { text-align: center; margin-top: 30px; font-size: 18px; font-weight: 500; }
 
+        /* Style for N/A values */
+        .na-value { color: #999; font-style: italic; }
+        
+        /* Style for rows with no data */
+        .no-data-row { background-color: #fff3cd !important; }
+        .no-data-row td { color: #856404; }
+
         .back-btn {
             display: inline-block;
             margin-top: 20px;
@@ -26,6 +33,16 @@
             transition: 0.3s;
         }
         .back-btn:hover { background: #00f2fe; }
+
+        .info-note {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -34,6 +51,11 @@
         <p style="text-align:center;">Username: {{ details['Name'] }} | Admission Number: {{ details['Username'] }}</p>
 
         <h2>Subject-wise Attendance</h2>
+        
+        <div class="info-note">
+            <strong>Note:</strong> Subjects showing "N/A" may not have attendance data available yet or the attendance tracking hasn't started.
+        </div>
+        
         <table>
             <tr>
                 <th>Subject</th>
@@ -45,14 +67,14 @@
                 <th>Attendance %</th>
             </tr>
             {% for row in df %}
-            <tr>
+            <tr {% if row['Total Days'] == 0 %}class="no-data-row"{% endif %}>
                 <td>{{ row['Subject'] }}</td>
-                <td>{{ row['Start Date'] }}</td>
-                <td>{{ row['End Date'] }}</td>
-                <td>{{ row['Total Days'] }}</td>
-                <td>{{ row['No. of Present'] }}</td>
-                <td>{{ row['No. of Absent'] }}</td>
-                <td>{{ row['Attendance %'] }}</td>
+                <td>{% if row['Start Date'] == 'N/A' %}<span class="na-value">N/A</span>{% else %}{{ row['Start Date'] }}{% endif %}</td>
+                <td>{% if row['End Date'] == 'N/A' %}<span class="na-value">N/A</span>{% else %}{{ row['End Date'] }}{% endif %}</td>
+                <td>{% if row['Total Days'] == 0 %}<span class="na-value">0</span>{% else %}{{ row['Total Days'] }}{% endif %}</td>
+                <td>{% if row['No. of Present'] == 0 and row['Total Days'] == 0 %}<span class="na-value">0</span>{% else %}{{ row['No. of Present'] }}{% endif %}</td>
+                <td>{% if row['No. of Absent'] == 0 and row['Total Days'] == 0 %}<span class="na-value">0</span>{% else %}{{ row['No. of Absent'] }}{% endif %}</td>
+                <td>{% if row['Attendance %'] == 'N/A' %}<span class="na-value">N/A</span>{% else %}{{ row['Attendance %'] }}%{% endif %}</td>
             </tr>
             {% endfor %}
         </table>
