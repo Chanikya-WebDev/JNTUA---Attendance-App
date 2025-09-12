@@ -4,65 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Error - JNTUA Attendance Checker</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS for a modern, responsive design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter for clean typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
         body {
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(135deg, #4facfe, #00f2fe);
-        }
-        .container {
-            background: #fff;
-            padding: 40px 50px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            width: 400px;
-            text-align: center;
-        }
-        .error-icon {
-            font-size: 48px;
-            color: #e74c3c;
-            margin-bottom: 20px;
-        }
-        h2 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            border: 1px solid #f5c6cb;
-        }
-        .back-btn {
-            display: inline-block;
-            padding: 12px 20px;
-            background: #4facfe;
-            color: #fff;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: 0.3s;
-        }
-        .back-btn:hover {
-            background: #00f2fe;
+            font-family: 'Inter', sans-serif;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="error-icon">⚠️</div>
-        <h2>Oops! Something went wrong</h2>
-        
-        <div class="error-message">
-            {{ error_message }}
+<body class="bg-gray-100 flex flex-col min-h-screen">
+
+    <!-- Main Content Area -->
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div class="w-full max-w-md mx-auto">
+            
+            <!-- Error Card -->
+            <div class="bg-white rounded-xl shadow-md p-8 border border-gray-200 text-center">
+                
+                <!-- Icon -->
+                <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-red-100 mb-6">
+                    <span class="text-4xl">⚠️</span>
+                </div>
+
+                <h1 class="text-2xl font-bold text-gray-800 mb-3">Oops! Something went wrong</h1>
+                
+                <!-- Dynamic Error Message -->
+                <div class="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 mb-8">
+                    <p>{{ error_message }}</p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="{{ back_url }}" class="w-full sm:w-auto text-center px-6 py-2.5 bg-indigo-600 text-white font-medium text-sm leading-normal uppercase rounded-lg shadow-md hover:bg-indigo-700 transition duration-150 ease-in-out">
+                        <span>←</span> Go Back
+                    </a>
+                     
+                </div>
+            </div>
         </div>
-        
-        <a class="back-btn" href="{{ back_url }}">← Go Back</a>
-    </div>
+    </main>
+
+    <!-- Professional and Responsive Footer -->
+    <footer class="bg-gray-800 text-gray-300 shadow-inner mt-auto">
+        <div class="container mx-auto px-6 py-8">
+            <div class="flex flex-col md:flex-row justify-evenly items-center md:items-center space-y-8 md:space-y-0">
+                <div class="text-center md:text-left w-full md:w-auto">
+                    <h3 class="font-bold text-lg text-white mb-2">J. Chanikya</h3>
+                    <p class="text-sm">Computer Science & Engineering</p>
+                    <!-- <p class="text-sm">Batch of 2024-2027</p> -->
+                </div>
+                <div class="text-center md:text-center max-w-md mx-auto md:mx-0">
+                    <h3 class="font-semibold text-lg text-white mb-2">Contribute to this Project</h3>
+                    <p class="text-sm mb-4">
+                        This is an open-source project. Feel free to collaborate, report issues, or suggest improvements on GitHub.
+                    </p>
+                    <a href="https://github.com/Chanikya-WebDev/JNTUA---Attendance-app" target="_blank" rel="noopener noreferrer" 
+                       class="inline-flex items-center justify-center px-4 py-2 bg-gray-700 hover:bg-indigo-600 text-white font-medium rounded-lg shadow-md transition-colors duration-300">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.378.203 2.398.1 2.65.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" />
+                        </svg>
+                        Contribute on GitHub
+                    </a>
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-gray-700 text-center text-sm">
+                <p>&copy; 2025 J. Chanikya. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
 </body>
 </html>

@@ -2,92 +2,184 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Attendance Result</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Result - JNTUA</title>
+    <!-- Tailwind CSS for a modern, responsive design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter for clean typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
-        body { background: #f4f6f8; padding: 20px; }
-        h2, h3 { color: #333; text-align: center; margin: 20px 0; }
-        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px 15px; border: 1px solid #ddd; text-align: center; }
-        th { background: #4facfe; color: white; }
-        tr:nth-child(even) { background: #f9f9f9; }
-        .overall { text-align: center; margin-top: 30px; font-size: 18px; font-weight: 500; }
-
-        /* Style for N/A values */
-        .na-value { color: #999; font-style: italic; }
-        
-        /* Style for rows with no data */
-        .no-data-row { background-color: #fff3cd !important; }
-        .no-data-row td { color: #856404; }
-
-        .back-btn {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background: #4facfe;
-            color: #fff;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: 0.3s;
+        body {
+            font-family: 'Inter', sans-serif;
         }
-        .back-btn:hover { background: #00f2fe; }
-
-        .info-note {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 15px 0;
-            font-size: 14px;
+        /* Custom style to allow word breaking */
+        .table-cell-wrap {
+            word-break: break-word;
+        }
+        /* Custom scrollbar for subtle horizontal scroll */
+        .subtle-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #a5b4fc #f3f4f6;
+        }
+        .subtle-scrollbar::-webkit-scrollbar {
+            height: 8px;
+        }
+        .subtle-scrollbar::-webkit-scrollbar-thumb {
+            background: #a5b4fc;
+            border-radius: 6px;
+        }
+        .subtle-scrollbar::-webkit-scrollbar-track {
+            background: #f3f4f6;
+        }
+        /* Responsive table tweaks */
+        @media (max-width: 450px) {
+            .attendance-table {
+                min-width: 400px;
+            }
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h2>Student Details</h2>
-        <p style="text-align:center;">Username: {{ details['Name'] }} | Admission Number: {{ details['Username'] }}</p>
+<body class="bg-gray-100 flex flex-col min-h-screen">
 
-        <h2>Subject-wise Attendance</h2>
-        
-        <div class="info-note">
-            <strong>Note:</strong> Subjects showing "N/A" may not have attendance data available yet or the attendance tracking hasn't started.
-        </div>
-        
-        <table>
-            <tr>
-                <th>Subject</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Total Days</th>
-                <th>Present</th>
-                <th>Absent</th>
-                <th>Attendance %</th>
-            </tr>
-            {% for row in df %}
-            <tr {% if row['Total Days'] == 0 %}class="no-data-row"{% endif %}>
-                <td>{{ row['Subject'] }}</td>
-                <td>{% if row['Start Date'] == 'N/A' %}<span class="na-value">N/A</span>{% else %}{{ row['Start Date'] }}{% endif %}</td>
-                <td>{% if row['End Date'] == 'N/A' %}<span class="na-value">N/A</span>{% else %}{{ row['End Date'] }}{% endif %}</td>
-                <td>{% if row['Total Days'] == 0 %}<span class="na-value">0</span>{% else %}{{ row['Total Days'] }}{% endif %}</td>
-                <td>{% if row['No. of Present'] == 0 and row['Total Days'] == 0 %}<span class="na-value">0</span>{% else %}{{ row['No. of Present'] }}{% endif %}</td>
-                <td>{% if row['No. of Absent'] == 0 and row['Total Days'] == 0 %}<span class="na-value">0</span>{% else %}{{ row['No. of Absent'] }}{% endif %}</td>
-                <td>{% if row['Attendance %'] == 'N/A' %}<span class="na-value">N/A</span>{% else %}{{ row['Attendance %'] }}%{% endif %}</td>
-            </tr>
-            {% endfor %}
+    <!-- Main Content Area -->
+    <main class="flex-grow p-4 sm:p-6 md:p-8">
+        <div class="max-w-7xl mx-auto">
+            
+            <!-- Header Section with Dynamic Data -->
+            <header class="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-200">
+                <div class="flex items-center space-x-4">
+                    <div class="flex-shrink-0 w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center text-white text-3xl font-bold">
+                        {{ details['Name'][0] if details['Name'] else 'S' }}
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">{{ details['Name'] }}</h1>
+                        <p class="text-md text-gray-500">ID: {{ details['Username'] }}</p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Card -->
+            <div class="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+                <div class="p-4 sm:p-6">
+                    <h2 class="text-xl font-bold text-gray-800">Subject-wise Attendance</h2>
+                    <p class="text-sm text-gray-600 mt-1 mb-6 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                        <strong>📝 Note:</strong> Subjects showing "N/A" may not have attendance data available yet.
+                    </p>
+
+                    <!-- Table Container for Horizontal Scrolling on Small Screens -->
+                    <div class="overflow-x-auto rounded-lg border border-gray-200 subtle-scrollbar" style="max-width:100vw;">
+        <!-- Responsive table: min-width for scroll, max-width for mobile, custom scrollbar -->
+        <table class="attendance-table min-w-[400px] w-full text-sm text-left text-gray-600">
+            <thead class="text-xs text-white uppercase bg-sky-500">
+                <tr>
+                    <!-- 
+                        KEY CHANGE #1: Removed `whitespace-nowrap` from the Subject column.
+                        - This allows the subject text to wrap onto multiple lines on small screens.
+                        - I've given it a fixed width (`w-48`) to control how much space it takes.
+                    -->
+                    <th scope="col" class="px-4 py-3 w-48">Subject</th>
+                    <th scope="col" class="px-3 py-3  text-center">Start Date</th>
+                    <th scope="col" class="px-3 py-3  text-center">End Date</th>
+                    <th scope="col" class="px-2 py-3  text-center">Total Days</th>
+                    <th scope="col" class="px-1 py-3  text-center">Present</th>
+                    <th scope="col" class="px-1 py-3  text-center">Absent</th>
+                    <th scope="col" class="px-1 py-3  text-center">%</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Django/Jinja2 template loop. The dummy data has been removed. -->
+                {% for row in df %}
+                <tr class="bg-white border-b hover:bg-gray-50 {% if row['Total Days'] == 0 %}bg-amber-50 hover:bg-amber-100{% endif %}">
+                    <!-- 
+                        KEY CHANGE #2: Removed `whitespace-nowrap` from the subject cell as well.
+                        - The text inside this cell will now wrap according to the width set in the header.
+                    -->
+                    <th scope="row" class="px-4 py-4 font-medium text-gray-900">{{ row['Subject'] }}</th>
+                    <td class="px-1 py-4 text-center ">{% if row['Start Date'] == 'N/A' %}<span class="italic text-gray-400">N/A</span>{% else %}{{ row['Start Date'] }}{% endif %}</td>
+                    <td class="px-1 py-4 text-center ">{% if row['End Date'] == 'N/A' %}<span class="italic text-gray-400">N/A</span>{% else %}{{ row['End Date'] }}{% endif %}</td>
+                    <td class="px-1 py-2 text-center whitespace-nowrap">{{ row['Total Days'] }}</td>
+                    <td class="px-1 py-2 text-center whitespace-nowrap">{{ row['No. of Present'] }}</td>
+                    <td class="px-1 py-2 text-center whitespace-nowrap">{{ row['No. of Absent'] }}</td>
+                    <td class="px-1 py-2 text-center whitespace-nowrap font-bold">
+                        {% if row['Attendance %'] == 'N/A' %}
+                            <span class="italic text-gray-400">N/A</span>
+                        {% else %}
+                            {% set percentage = row['Attendance %'] | float %}
+                            <span class="{% if percentage >= 75 %}text-green-600{% elif percentage >= 60 %}text-orange-500{% else %}text-red-600{% endif %}">
+                                {{ row['Attendance %'] }}%
+                            </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
-
-        <div class="overall">
-            <p>Total Days (All Subjects): {{ total_days }}</p>
-            <p>Total Present (All Subjects): {{ total_present }}</p>
-            <p>Overall Attendance: {{ overall_attendance_pct }}%</p>
-        </div>
-
-        <div style="text-align:center;">
-            <a class="back-btn" href="/">← Back to Login</a>
-        </div>
     </div>
+
+                <!-- Overall Statistics Section with Dynamic Data -->
+                <div class="bg-gray-50 p-6 border-t border-gray-200">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">📊 Overall Statistics</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                        <div class="bg-white p-4 rounded-lg border">
+                            <p class="text-2xl font-bold {% if overall_attendance_pct >= 75 %}text-green-600{% elif overall_attendance_pct >= 60 %}text-orange-500{% else %}text-red-600{% endif %}">{{ overall_attendance_pct }}%</p>
+                            <p class="text-sm text-gray-500">Overall Attendance</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border">
+                            <p class="text-2xl font-bold text-gray-800">{{ total_days }}</p>
+                            <p class="text-sm text-gray-500">Total Days</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border">
+                            <p class="text-2xl font-bold text-green-600">{{ total_present }}</p>
+                            <p class="text-sm text-gray-500">Days Present</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border">
+                            <p class="text-2xl font-bold text-red-600">{{ total_days - total_present }}</p>
+                            <p class="text-sm text-gray-500">Days Absent</p>
+                        </div>
+                    </div>
+                </div>
+                 <!-- Action Buttons -->
+                <div class="p-6 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="/" class="w-full sm:w-auto text-center px-6 py-2.5 bg-indigo-600 text-white font-medium text-sm leading-normal uppercase rounded-lg shadow-md hover:bg-indigo-700 transition duration-150 ease-in-out">
+                        ← Back to Login
+                    </a>
+                     
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Professional and Responsive Footer -->
+    <footer class="bg-gray-800 text-gray-300 shadow-inner mt-auto">
+        <div class="container mx-auto px-6 py-8">
+            <div class="flex flex-col md:flex-row justify-evenly items-center md:items-center space-y-8 md:space-y-0">
+                <div class="text-center md:text-left w-full md:w-auto">
+                    <h3 class="font-bold text-lg text-white mb-2">J. Chanikya</h3>
+                    <p class="text-sm">Computer Science & Engineering</p>
+                    <!-- <p class="text-sm">Batch of 2024-2027</p> -->
+                </div>
+                <div class="text-center md:text-center max-w-md mx-auto md:mx-0">
+                    <h3 class="font-semibold text-lg text-white mb-2">Contribute to this Project</h3>
+                    <p class="text-sm mb-4">
+                        This is an open-source project. Feel free to collaborate, report issues, or suggest improvements on GitHub.
+                    </p>
+                    <a href="https://github.com/Chanikya-WebDev/JNTUA---Attendance-app" target="_blank" rel="noopener noreferrer" 
+                       class="inline-flex items-center justify-center px-4 py-2 bg-gray-700 hover:bg-indigo-600 text-white font-medium rounded-lg shadow-md transition-colors duration-300">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.378.203 2.398.1 2.65.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" />
+                        </svg>
+                        Contribute on GitHub
+                    </a>
+                </div>
+            </div>
+            <div class="mt-8 pt-6 border-t border-gray-700 text-center text-sm">
+                <p>&copy; 2025 J. Chanikya. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
 </body>
 </html>
+

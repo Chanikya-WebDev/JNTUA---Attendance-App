@@ -103,7 +103,7 @@ def fetch_attendance(session: requests.Session, subjects: list):
             total_days = len(statuses)
             present_count = sum(1 for status in statuses if status == "Present")
             absent_count = total_days - present_count
-            attendance_pct = round((present_count / total_days) * 100, 2) if total_days > 0 else 0
+            attendance_pct = round((present_count / total_days) * 100, 1) if total_days > 0 else 0
 
             summary = {
                 "Subject": att_payload.get("sub_fullname", "Unknown"),
