@@ -1,15 +1,57 @@
+
 import os
-from flask import Flask, render_template, request
+from dotenv import load_dotenv
+from flask import Flask, flash, render_template, request,redirect, url_for
+from flask_mail import Mail, Message
 from attendance_scraper import login, get_student_details, get_subjects, fetch_attendance
 
+load_dotenv()
 # Initialize Flask app
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "your-secret-key-here")
+
+# Flask-Mail configuration using environment variables
+app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True') == 'True'
+app.config['MAIL_USE_SSL'] = os.environ.get('MAIL_USE_SSL', 'False') == 'True'
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
+mail = Mail(app)
 
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/contact', methods=['GET', 'POST'])
+def contact():
+    if request.method == 'POST':
+        admission = request.form.get('admission', '').strip()
+        user_email = request.form.get('user_email', '').strip()
+        message = request.form.get('message', '').strip()
+        screenshot = request.files.get('screenshot')
+        if not admission or not message or not user_email:
+            flash('Admission number, your email, and issue message are required.', 'error')
+            return redirect(url_for('contact'))
+            # Prepare email
+        msg = Message(
+            subject=f"Attendance App Issue from {admission}",
+            recipients=[app.config['MAIL_DEFAULT_SENDER']],
+            body=f"Admission Number: {admission}\nUser Email: {user_email}\n\nIssue Message:\n{message}"
+        )
+        # Attach screenshot if provided
+        if screenshot and screenshot.filename:
+            ext = screenshot.filename.rsplit('.', 1)[-1].lower()
+            if ext in ['png', 'jpg', 'jpeg']:
+                msg.attach(screenshot.filename, screenshot.mimetype, screenshot.read())
+        mail.send(msg)
+        flash('Your issue has been submitted successfully!', 'success')
+        return redirect(url_for('index'))
+    return render_template('contact.html')
 
 
 @app.route('/check', methods=['POST'])
@@ -39,14 +81,20 @@ def check_attendance():
             round((total_present / total_days) * 100, 2)
             if total_days > 0 else 0
         )
-
+        username_env = os.environ.get('S_USERNAME')
+        show = details['Username'] == username_env
+        mess = None  
+        if show:
+            mess = os.environ.get('S_MESSAGE')
         return render_template(
             'result.html',
             details=details,
             df=df_summary.to_dict(orient="records"),
             total_days=total_days,
             total_present=total_present,
-            overall_attendance_pct=overall_attendance_pct
+            overall_attendance_pct=overall_attendance_pct,
+            show=show,
+            mess=mess
         )
 
     except ValueError as e:

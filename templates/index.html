@@ -38,7 +38,17 @@
 
     <!-- Main Content Area -->
     <main class="flex-grow flex items-center justify-center p-4 bg-gradient-to-br from-sky-400 to-indigo-500">
-        <div class="container bg-white w-full max-w-md p-8 sm:p-10 rounded-2xl shadow-2xl text-center">
+                <div class="container bg-white w-full max-w-md p-8 sm:p-10 rounded-2xl shadow-2xl text-center">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div id="flash-message" class="mb-4 p-3 bg-green-100 border-l-4 border-green-500 text-green-800 rounded-lg text-center font-semibold flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
             <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">JNTUA Attendance Checker</h2>
             <form id="loginForm" action="/check" method="POST">
                 <input type="text" name="username" placeholder="Username" required class="w-full px-4 py-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
@@ -100,5 +110,17 @@
         });
     </script>
     <script src="/_vercel/insights/script.js" defer></script>
+</body>
+<script>
+    // Hide flash message after 3 seconds
+    window.addEventListener('DOMContentLoaded', function() {
+        var flash = document.getElementById('flash-message');
+        if (flash) {
+            setTimeout(function() {
+                flash.style.display = 'none';
+            }, 3000);
+        }
+    });
+</script>
 </body>
 </html>

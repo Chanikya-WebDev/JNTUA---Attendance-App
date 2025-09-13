@@ -32,11 +32,11 @@
                     <div>
                         <h1 class="text-2xl font-bold text-gray-800">{{ details['Name'] }}</h1>
                         <p class="text-md text-gray-500">ID: {{ details['Username'] }}</p>
-                        {% if details['Username'] == '24005A0404' %}
-                        <div class="mt-2 flex items-center justify-start">
-                            <span class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-pink-400 via-red-400 to-yellow-300 text-white font-bold rounded-xl shadow-lg animate-pulse">
-                                <svg class="w-6 h-6 mr-2 text-pink-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 21.364l-7.682-7.682a4.5 4.5 0 010-6.364z"/></svg>
-                                CR AND GR of ECE 💖
+                        {% if show %}
+                        <div class="mt-2 flex flex-wrap items-center justify-start">
+                            <span class="inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-gradient-to-r from-pink-400 via-red-400 to-yellow-300 text-white font-bold rounded-xl shadow-lg animate-pulse text-sm sm:text-base">
+                                <svg class="w-5 h-5  mr-2 text-pink-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 21.364l-7.682-7.682a4.5 4.5 0 010-6.364z"/></svg>
+                                {{ mess }}
                             </span>
                         </div>
                         {% endif %}
@@ -126,7 +126,12 @@
             </div>
         </div>
     </main>
-
+    <div class="w-full flex justify-center items-center py-4 bg-transparent">
+        <a href="/contact" class="inline-flex items-center justify-center px-6 py-2.5 bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold text-base rounded-xl shadow-lg hover:from-red-600 hover:to-pink-600 transition duration-150 ease-in-out gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-1.414 1.414A9 9 0 105.636 18.364l1.414-1.414A7 7 0 1118.364 5.636z"/></svg>
+            Report Issue
+        </a>
+    </div>
     <footer class="bg-gray-800 text-gray-300 shadow-inner mt-auto">
         <div class="container mx-auto px-6 py-8">
             <div class="flex flex-col md:flex-row justify-evenly items-center md:items-center space-y-8 md:space-y-0">
