@@ -105,14 +105,25 @@ def fetch_attendance(session: requests.Session, subjects: list):
             absent_count = total_days - present_count
             attendance_pct = round((present_count / total_days) * 100, 1) if total_days > 0 else 0
 
+            end_date_str = max(dates).strftime("%d-%m-%Y") if dates else None
+            end_date_warning = False
+            if end_date_str:
+                try:
+                    end_date_obj = datetime.strptime(end_date_str, "%d-%m-%Y")
+                    days_diff = (datetime.now() - end_date_obj).days
+                    if days_diff > 30:
+                        end_date_warning = True
+                except Exception:
+                    pass
             summary = {
                 "Subject": att_payload.get("sub_fullname", "Unknown"),
                 "Start Date": min(dates).strftime("%d-%m-%Y") if dates else None,
-                "End Date": max(dates).strftime("%d-%m-%Y") if dates else None,
+                "End Date": end_date_str,
                 "Total Days": total_days if dates else 0,
                 "No. of Present": present_count if dates else 0,
                 "No. of Absent": absent_count if dates else 0,
-                "Attendance %": attendance_pct if dates else 0
+                "Attendance %": attendance_pct if dates else 0,
+                "End Date Warning": end_date_warning
             }
         else:
             # If table not found, store None/0 values
@@ -123,7 +134,8 @@ def fetch_attendance(session: requests.Session, subjects: list):
                 "Total Days": 0,
                 "No. of Present": 0,
                 "No. of Absent": 0,
-                "Attendance %": 0
+                "Attendance %": 0,
+                "End Date Warning": False
             }
         
         all_summaries.append(summary)
