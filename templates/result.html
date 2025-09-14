@@ -49,7 +49,7 @@
                     <div class="p-4 sm:p-0">
                         <h2 class="text-xl font-bold text-gray-800">Subject-wise Attendance</h2>
                         <p class="text-sm text-gray-600 mt-1 mb-6 bg-blue-50 p-3 rounded-lg border border-blue-200">
-                            <strong>📝 Note:</strong> Subjects showing "N/A" may not have attendance data available yet.
+                            <strong>📝 Note:</strong> Subjects showing "None" and "0" may not have attendance data available yet.
                         </p>
                     </div>
 
@@ -60,7 +60,7 @@
                                     <th scope="col" class="px-2 py-3">Subject</th>
                                     <th scope="col" class="px-1 py-3 text-center">Start Date</th>
                                     <th scope="col" class="px-1 py-3 text-center">End Date</th>
-                                    <th scope="col" class="px-1 py-3 text-center">Total Days</th>
+                                    <th scope="col" class="px-1 py-3 text-center">Total Hours</th>
                                     <th scope="col" class="px-0.5 py-3 text-center">Present</th>
                                     <th scope="col" class="px-0.5 py-3 text-center">Absent</th>
                                     <th scope="col" class="px-1 py-3 text-center">%</th>
@@ -106,15 +106,15 @@
                         </div>
                         <div class="bg-white p-4 rounded-lg border">
                             <p class="text-2xl font-bold text-gray-800">{{ total_days }}</p>
-                            <p class="text-sm text-gray-500">Total Days</p>
+                            <p class="text-sm text-gray-500">Total Hours</p>
                         </div>
                         <div class="bg-white p-4 rounded-lg border">
                             <p class="text-2xl font-bold text-green-600">{{ total_present }}</p>
-                            <p class="text-sm text-gray-500">Days Present</p>
+                            <p class="text-sm text-gray-500">Hours Present</p>
                         </div>
                         <div class="bg-white p-4 rounded-lg border">
                             <p class="text-2xl font-bold text-red-600">{{ total_days - total_present }}</p>
-                            <p class="text-sm text-gray-500">Days Absent</p>
+                            <p class="text-sm text-gray-500">Hours Absent</p>
                         </div>
                     </div>
                 </div>
