@@ -1,9 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JNTUA Attendance Checker</title>
+    <!-- Primary Meta Tags -->
+    <title>JNTUA Attendance App</title>
+    <meta name="title" content="JNTUA Attendance App">
+    <meta name="description"
+        content="Check your JNTUA student attendance online easily with the JNTUA Attendance App. View subject-wise attendance percentage, total classes, and attendance details.">
+
+    <!-- Keywords for SEO -->
+    <meta name="keywords"
+        content="JNTUA Attendance, JNTUA Students, Attendance App, Attendance Checker, JNTUA College, Attendance Percentage">
+
+    <!-- Author -->
+    <meta name="author" content="JNTUA Attendance">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jntua-attendance-app.vercel.app/">
+    <meta property="og:title" content="JNTUA Attendance App">
+    <meta property="og:description"
+        content="Check your JNTUA student attendance online easily with the JNTUA Attendance App.">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://jntua-attendance-app.vercel.app/">
+    <meta property="twitter:title" content="JNTUA Attendance App">
+    <meta property="twitter:description"
+        content="Check your JNTUA student attendance online easily with the JNTUA Attendance App.">
+
+
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn-tailwindcss.vercel.app/"></script>
     <!-- Google Fonts: Inter -->
@@ -19,8 +47,10 @@
         /* Custom Loader CSS */
         #loader {
             display: none;
-            border: 6px solid #f3f3f3; /* Light grey */
-            border-top: 6px solid #3b82f6; /* Blue-500 */
+            border: 6px solid #f3f3f3;
+            /* Light grey */
+            border-top: 6px solid #3b82f6;
+            /* Blue-500 */
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -29,31 +59,45 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
+
 <body class="bg-gray-100 flex flex-col min-h-screen">
 
     <!-- Main Content Area -->
     <main class="flex-grow flex items-center justify-center p-4 bg-gradient-to-br from-sky-400 to-indigo-500">
-                <div class="container bg-white w-full max-w-md p-8 sm:p-10 rounded-2xl shadow-2xl text-center">
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div id="flash-message" class="mb-4 p-3 bg-green-100 border-l-4 border-green-500 text-green-800 rounded-lg text-center font-semibold flex items-center justify-center gap-2">
-                                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                    {{ message }}
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
+        <div class="container bg-white w-full max-w-md p-8 sm:p-10 rounded-2xl shadow-2xl text-center">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div id="flash-message"
+                class="mb-4 p-3 bg-green-100 border-l-4 border-green-500 text-green-800 rounded-lg text-center font-semibold flex items-center justify-center gap-2">
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
             <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">JNTUA Attendance Checker</h2>
             <form id="loginForm" action="/check" method="POST">
-                <input type="text" name="username" placeholder="Username" required class="w-full px-4 py-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                <input type="password" name="password" placeholder="Password" required class="w-full px-4 py-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                <button type="submit" class="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">Check Attendance</button>
+                <input type="text" name="username" placeholder="Username" required
+                    class="w-full px-4 py-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                <input type="password" name="password" placeholder="Password" required
+                    class="w-full px-4 py-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                <button type="submit"
+                    class="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">Check
+                    Attendance</button>
             </form>
             <div id="loader"></div>
         </div>
@@ -75,20 +119,24 @@
                 <div class="text-center md:text-center max-w-md mx-auto md:mx-0">
                     <h3 class="font-semibold text-lg text-white mb-2">Contribute to this Project</h3>
                     <p class="text-sm mb-4">
-                        This is an open-source project. Feel free to collaborate, report issues, or suggest improvements on GitHub.
+                        This is an open-source project. Feel free to collaborate, report issues, or suggest improvements
+                        on GitHub.
                     </p>
-                    <a href="https://github.com/Chanikya-WebDev/JNTUA---Attendance-app" target="_blank" rel="noopener noreferrer" 
-                       class="inline-flex items-center justify-center px-4 py-2 bg-gray-700 hover:bg-indigo-600 text-white font-medium rounded-lg shadow-md transition-colors duration-300">
+                    <a href="https://github.com/Chanikya-WebDev/JNTUA---Attendance-app" target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center justify-center px-4 py-2 bg-gray-700 hover:bg-indigo-600 text-white font-medium rounded-lg shadow-md transition-colors duration-300">
                         <!-- GitHub Icon SVG -->
                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.378.203 2.398.1 2.65.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" />
+                            <path fill-rule="evenodd"
+                                d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.378.203 2.398.1 2.65.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z"
+                                clip-rule="evenodd" />
                         </svg>
                         Contribute on GitHub
                     </a>
                 </div>
 
             </div>
-            
+
             <!-- Footer Bottom: Copyright -->
             <div class="mt-8 pt-6 border-t border-gray-700 text-center text-sm">
                 <p>&copy; 2025 J. Chanikya. All Rights Reserved.</p>
@@ -100,7 +148,7 @@
         const form = document.getElementById('loginForm');
         const loader = document.getElementById('loader');
 
-        form.addEventListener('submit', function(){
+        form.addEventListener('submit', function () {
             loader.style.display = 'block';  // show loader
             // This timeout is just for demonstration. 
             // In a real app, you would hide the loader upon receiving a response from the server.
@@ -109,18 +157,18 @@
             }, 7000);
         });
     </script>
-    <script src="/_vercel/insights/script.js" defer></script>
 </body>
 <script>
     // Hide flash message after 3 seconds
-    window.addEventListener('DOMContentLoaded', function() {
+    window.addEventListener('DOMContentLoaded', function () {
         var flash = document.getElementById('flash-message');
         if (flash) {
-            setTimeout(function() {
+            setTimeout(function () {
                 flash.style.display = 'none';
             }, 3000);
         }
     });
 </script>
 </body>
+
 </html>
