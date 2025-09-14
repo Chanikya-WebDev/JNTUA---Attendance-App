@@ -1,7 +1,7 @@
 
 import os
 from dotenv import load_dotenv
-from flask import Flask, flash, render_template, request,redirect, url_for
+from flask import Flask, flash, render_template, request,redirect, url_for,send_from_directory
 from flask_mail import Mail, Message
 from attendance_scraper import login, get_student_details, get_subjects, fetch_attendance
 
@@ -112,6 +112,15 @@ def check_attendance():
             error_message=f"An error occurred while fetching attendance data: {str(e)}",
             back_url="/"
         )
+
+@app.route("/sitemap.xml")
+def sitemap():
+    return send_from_directory("public", "sitemap.xml")
+
+# Serve robots.txt
+@app.route("/robots.txt")
+def robots():
+    return send_from_directory("public", "robots.txt")
 
 
 @app.errorhandler(404)

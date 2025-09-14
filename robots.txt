@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://jntua-attendance-app.vercel.app/sitemap.xml
