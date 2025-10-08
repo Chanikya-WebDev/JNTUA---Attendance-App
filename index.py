@@ -29,6 +29,7 @@ def index():
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
+    back_url = request.args.get('back_url', url_for('index'))
     if request.method == 'POST':
         admission = request.form.get('admission', '').strip()
         user_email = request.form.get('user_email', '').strip()
@@ -51,7 +52,7 @@ def contact():
         mail.send(msg)
         flash('Your issue has been submitted successfully!', 'success')
         return redirect(url_for('index'))
-    return render_template('contact.html')
+    return render_template('contact.html', back_url=back_url)
 
 
 @app.route('/check', methods=['POST'])
@@ -94,7 +95,8 @@ def check_attendance():
             total_present=total_present,
             overall_attendance_pct=overall_attendance_pct,
             show=show,
-            mess=mess
+            mess=mess,
+            back_url=request.url
         )
 
     except ValueError as e:
@@ -115,12 +117,12 @@ def check_attendance():
 
 @app.route("/sitemap.xml")
 def sitemap():
-    return send_from_directory("public", "sitemap.xml")
+    return send_from_directory("static", "sitemap.xml")
 
 # Serve robots.txt
 @app.route("/robots.txt")
 def robots():
-    return send_from_directory("public", "robots.txt")
+    return send_from_directory("static", "robots.txt")
 
 
 @app.errorhandler(404)

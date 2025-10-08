@@ -1,0 +1,174 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f3f4f6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.contact-form-container {
+    width: 100%;
+    max-width: 32rem;
+    background-color: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    padding: 2rem;
+    border: 1px solid #e5e7eb;
+    margin-top: 3rem;
+}
+
+.success-message {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background-color: #d1fae5;
+    border-left: 4px solid #10b981;
+    color: #065f46;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.success-message svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #10b981;
+}
+
+h2 {
+    font-size: 1.875rem;
+    font-weight: 800;
+    color: #4338ca;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    letter-spacing: -0.025em;
+}
+
+.form-description {
+    text-align: center;
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+input[type="text"],
+input[type="email"],
+textarea {
+    margin-top: 0.25rem;
+    display: block;
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    transition: all 0.15s ease-in-out;
+    padding: 0.75rem;
+    font-size: 1rem;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+textarea:focus {
+    border-color: #6366f1;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    --tw-ring-color: #a5b4fc;
+}
+
+textarea {
+    resize: none;
+}
+
+.file-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.file-input-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.file-input-label span {
+    color: #9ca3af;
+}
+
+input[type="file"] {
+    margin-top: 0.25rem;
+    display: block;
+    width: 100%;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.file-input::-webkit-file-upload-button {
+    margin-right: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    background-color: #e0e7ff;
+    color: #4338ca;
+}
+
+.file-input::-webkit-file-upload-button:hover {
+    background-color: #c7d2fe;
+}
+
+.submit-button {
+    width: 100%;
+    padding: 0.75rem;
+    background-image: linear-gradient(to right, #6366f1, #a855f7);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transition: all 0.15s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.submit-button:hover {
+    background-image: linear-gradient(to right, #4f46e5, #9333ea);
+}
+
+.submit-button svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
