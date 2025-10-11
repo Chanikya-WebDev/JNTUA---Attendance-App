@@ -81,15 +81,36 @@ def check_attendance():
             round((total_present / total_days) * 100, 2)
             if total_days > 0 else 0
         )
+
+        # Get df as list of dicts
+        df = df_summary.to_dict(orient="records")
+
+        # Calculate Can Skip and Need to Attend for each subject
+        for row in df:
+            total = row['Total Days']
+            present = row['No. of Present']
+            pct = row['Attendance %']
+            if total == 0:
+                row['Can Skip'] = 0
+                row['Need to Attend'] = 0
+            elif pct >= 75:
+                max_leaves = int((present / 0.75) - total)
+                row['Can Skip'] = max(0, max_leaves)
+                row['Need to Attend'] = 0
+            else:
+                required = int((0.75 * total - present) / 0.25)
+                row['Can Skip'] = 0
+                row['Need to Attend'] = max(0, required)
+
         username_env = os.environ.get('S_USERNAME')
         show = details['Username'] == username_env
-        mess = None  
+        mess = None
         if show:
             mess = os.environ.get('S_MESSAGE')
         return render_template(
             'result.html',
             details=details,
-            df=df_summary.to_dict(orient="records"),
+            df=df,
             total_days=total_days,
             total_present=total_present,
             overall_attendance_pct=overall_attendance_pct,

@@ -37,6 +37,10 @@
 
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn-tailwindcss.vercel.app/"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Animate.css for animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -83,13 +87,24 @@
             font-family: 'Inter', sans-serif;
         }
 
+        /* Animated background */
+        main {
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         /* Custom Loader CSS */
         #loader {
             display: none;
             border: 6px solid #f3f3f3;
-            /* Light grey */
             border-top: 6px solid #3b82f6;
-            /* Blue-500 */
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -98,22 +113,34 @@
         }
 
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
-            100% {
-                transform: rotate(360deg);
-            }
+        /* Input styling */
+        .input-group {
+            position: relative;
+        }
+
+        .input-group input {
+            padding-left: 3rem;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
         }
     </style>
 </head>
 
-<body class="bg-gray-100 flex flex-col min-h-screen">
+<body class="bg-gray-100 flex flex-col min-h-screen animate__animated animate__fadeIn">
 
     <!-- Main Content Area -->
     <main class="flex-grow flex items-center justify-center p-4 bg-gradient-to-br from-sky-400 to-indigo-500">
-        <div class="container bg-white w-full max-w-md p-8 sm:p-10 rounded-2xl shadow-2xl text-center">
+        <div class="container bg-white w-full max-w-md p-8 sm:p-10 rounded-2xl shadow-2xl text-center animate__animated animate__zoomIn animate__delay-1s">
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
             {% for category, message in messages %}
@@ -128,15 +155,26 @@
             {% endfor %}
             {% endif %}
             {% endwith %}
-            <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">Calculate Attendance</h2>
+            <div class="mb-6">
+                <i class="fas fa-graduation-cap text-6xl text-indigo-600 mb-4"></i>
+                <h1 class="text-3xl font-bold text-gray-800">JNTUA Attendance Tracker</h1>
+                <p class="text-gray-600 mt-2">Access your attendance data securely</p>
+            </div>
             <form id="loginForm" action="/check" method="POST">
-                <input type="text" name="username" placeholder="Username" required
-                    class="w-full px-4 py-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                <input type="password" name="password" placeholder="Password" required
-                    class="w-full px-4 py-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                <button type="submit"
-                    class="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">Check
-                    Attendance</button>
+                <div class="input-group mb-4">
+                    <i class="fas fa-user"></i>
+                    <input type="text" name="username" placeholder="Username" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300">
+                </div>
+                <div class="input-group mb-6">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="password" placeholder="Password" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300">
+                </div>
+                <button type="submit" id="loginBtn"
+                    class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Check Attendance
+                </button>
             </form>
             <div id="loader"></div>
         </div>
@@ -148,11 +186,7 @@
             <div class="flex flex-col md:flex-row justify-evenly items-center md:items-center space-y-8 md:space-y-0">
 
                 <!-- Personal & Academic Details -->
-                <div class="text-center md:text-left w-full md:w-auto">
-                    <h3 class="font-bold text-lg text-white mb-2">J. Chanikya</h3>
-                    <p class="text-sm">Computer Science & Engineering</p>
-                    <!-- <p class="text-sm">Batch of 2024-2027</p> -->
-                </div>
+                
 
                 <!-- GitHub Contribution Section -->
                 <div class="text-center md:text-center max-w-md mx-auto md:mx-0">
@@ -178,7 +212,7 @@
 
             <!-- Footer Bottom: Copyright -->
             <div class="mt-8 pt-6 border-t border-gray-700 text-center text-sm">
-                <p>&copy; 2025 J. Chanikya. All Rights Reserved.</p>
+                <p>&copy; 2025 JNTUA---Attendance-app. All Rights Reserved.</p>
             </div>
         </div>
     </footer>
@@ -186,14 +220,24 @@
     <script>
         const form = document.getElementById('loginForm');
         const loader = document.getElementById('loader');
+        const loginBtn = document.getElementById('loginBtn');
 
         form.addEventListener('submit', function () {
             loader.style.display = 'block';  // show loader
-            // This timeout is just for demonstration. 
+            // This timeout is just for demonstration.
             // In a real app, you would hide the loader upon receiving a response from the server.
             setTimeout(() => {
                 loader.style.display = 'none';
             }, 7000);
+        });
+
+        // Button bounce on hover
+        loginBtn.addEventListener('mouseenter', function () {
+            loginBtn.classList.add('animate__animated', 'animate__bounce');
+        });
+
+        loginBtn.addEventListener('mouseleave', function () {
+            loginBtn.classList.remove('animate__animated', 'animate__bounce');
         });
     </script>
 </body>

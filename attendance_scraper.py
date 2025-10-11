@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
+import concurrent.futures
 
 BASE_URL = "https://jntuaceastudents.classattendance.in/"
 
@@ -75,69 +76,74 @@ class SimpleDataFrame:
         # Only sum numeric values, skip "N/A" or non-numeric entries
         return sum(row[column] for row in self.data if isinstance(row[column], (int, float)))
 
+def fetch_single_attendance(session: requests.Session, att_payload: dict) -> dict:
+    att_res = session.post(BASE_URL + "studentsubatt.php", data=att_payload)
+    soup = BeautifulSoup(att_res.text, "html.parser")
+    table = soup.find("table", class_="table table-bordered table-striped")
+
+    if table:
+        records = []
+        for row in table.select("tbody tr"):
+            cols = row.find_all("td")
+            if not cols:
+                continue
+            records.append((cols[0].get_text(strip=True), cols[2].get_text(strip=True)))
+
+        dates, statuses = [], []
+        for date_str, status in records:
+            try:
+                date_obj = datetime.strptime(date_str, "%d-%m-%Y")
+                dates.append(date_obj)
+                statuses.append(status)
+            except ValueError:
+                continue
+
+        total_days = len(statuses)
+        present_count = sum(1 for status in statuses if status == "Present")
+        absent_count = total_days - present_count
+        attendance_pct = round((present_count / total_days) * 100, 1) if total_days > 0 else 0
+
+        end_date_str = max(dates).strftime("%d-%m-%Y") if dates else None
+        end_date_warning = False
+        if end_date_str:
+            try:
+                end_date_obj = datetime.strptime(end_date_str, "%d-%m-%Y")
+                days_diff = (datetime.now() - end_date_obj).days
+                if days_diff > 30:
+                    end_date_warning = True
+            except Exception:
+                pass
+        summary = {
+            "Subject": att_payload.get("sub_fullname", "Unknown"),
+            "Start Date": min(dates).strftime("%d-%m-%Y") if dates else None,
+            "End Date": end_date_str,
+            "Total Days": total_days if dates else 0,
+            "No. of Present": present_count if dates else 0,
+            "No. of Absent": absent_count if dates else 0,
+            "Attendance %": attendance_pct if dates else 0,
+            "End Date Warning": end_date_warning
+        }
+    else:
+        # If table not found, store None/0 values
+        summary = {
+            "Subject": att_payload.get("sub_fullname", "Unknown"),
+            "Start Date": None,
+            "End Date": None,
+            "Total Days": 0,
+            "No. of Present": 0,
+            "No. of Absent": 0,
+            "Attendance %": 0,
+            "End Date Warning": False
+        }
+
+    return summary
+
 def fetch_attendance(session: requests.Session, subjects: list):
-    all_summaries = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        futures = {executor.submit(fetch_single_attendance, session, att_payload): i for i, att_payload in enumerate(subjects)}
+        results = [None] * len(subjects)
+        for future in concurrent.futures.as_completed(futures):
+            i = futures[future]
+            results[i] = future.result()
 
-    for att_payload in subjects:
-        att_res = session.post(BASE_URL + "studentsubatt.php", data=att_payload)
-        soup = BeautifulSoup(att_res.text, "html.parser")
-        table = soup.find("table", class_="table table-bordered table-striped")
-        
-        if table:
-            records = []
-            for row in table.select("tbody tr"):
-                cols = row.find_all("td")
-                if not cols:
-                    continue
-                records.append((cols[0].get_text(strip=True), cols[2].get_text(strip=True)))
-            
-            dates, statuses = [], []
-            for date_str, status in records:
-                try:
-                    date_obj = datetime.strptime(date_str, "%d-%m-%Y")
-                    dates.append(date_obj)
-                    statuses.append(status)
-                except ValueError:
-                    continue
-            
-            total_days = len(statuses)
-            present_count = sum(1 for status in statuses if status == "Present")
-            absent_count = total_days - present_count
-            attendance_pct = round((present_count / total_days) * 100, 1) if total_days > 0 else 0
-
-            end_date_str = max(dates).strftime("%d-%m-%Y") if dates else None
-            end_date_warning = False
-            if end_date_str:
-                try:
-                    end_date_obj = datetime.strptime(end_date_str, "%d-%m-%Y")
-                    days_diff = (datetime.now() - end_date_obj).days
-                    if days_diff > 30:
-                        end_date_warning = True
-                except Exception:
-                    pass
-            summary = {
-                "Subject": att_payload.get("sub_fullname", "Unknown"),
-                "Start Date": min(dates).strftime("%d-%m-%Y") if dates else None,
-                "End Date": end_date_str,
-                "Total Days": total_days if dates else 0,
-                "No. of Present": present_count if dates else 0,
-                "No. of Absent": absent_count if dates else 0,
-                "Attendance %": attendance_pct if dates else 0,
-                "End Date Warning": end_date_warning
-            }
-        else:
-            # If table not found, store None/0 values
-            summary = {
-                "Subject": att_payload.get("sub_fullname", "Unknown"),
-                "Start Date": None,
-                "End Date": None,
-                "Total Days": 0,
-                "No. of Present": 0,
-                "No. of Absent": 0,
-                "Attendance %": 0,
-                "End Date Warning": False
-            }
-        
-        all_summaries.append(summary)
-    
-    return SimpleDataFrame(all_summaries)
+    return SimpleDataFrame(results)
