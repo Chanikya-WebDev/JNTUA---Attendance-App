@@ -3,47 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Form - JNTUA Attendance App</title>
+    <title>Report Issue - JNTUA Attendance</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
 </head>
-<body class="bg-gray-100 flex flex-col min-h-screen">
-    <main class="flex-grow flex items-center justify-center px-2 py-6 sm:p-6 md:p-8">
-        <div class="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-6 sm:p-8 border border-gray-200 mt-4 sm:mt-12">
-            {% if success_message %}
-            <div class="mb-4 p-3 bg-green-100 border-l-4 border-green-500 text-green-800 rounded-lg text-center font-semibold flex items-center justify-center gap-2">
-                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                {{ success_message }}
+<body class="bg-gray-100 flex flex-col min-h-screen" style="font-family: 'Inter', sans-serif;">
+
+    <main class="flex-grow p-4">
+        <div class="max-w-2xl mx-auto">
+            <div class="bg-white rounded-xl shadow-md p-8 border border-gray-200">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Report an Issue</h1>
+                    <p class="text-gray-600">Help us improve by reporting any problems you encountered.</p>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-50 border border-red-200 text-red-800{% else %}bg-green-50 border border-green-200 text-green-800{% endif %}">
+                                <i class="fas {% if category == 'error' %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %} mr-2"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <div>
+                        <label for="admission" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-id-card mr-2"></i>Admission Number
+                        </label>
+                        <input type="text" id="admission" name="admission" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                               placeholder="Enter your admission number">
+                    </div>
+
+                    <div>
+                        <label for="user_email" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-envelope mr-2"></i>Your Email
+                        </label>
+                        <input type="email" id="user_email" name="user_email" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                               placeholder="Enter your email address">
+                    </div>
+
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-comment mr-2"></i>Issue Description
+                        </label>
+                        <textarea id="message" name="message" rows="5" required
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors resize-vertical"
+                                  placeholder="Describe the issue you encountered..."></textarea>
+                    </div>
+
+                    <div>
+                        <label for="screenshot" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-image mr-2"></i>Screenshot (Optional)
+                        </label>
+                        <input type="file" id="screenshot" name="screenshot" accept="image/*"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                        <p class="text-sm text-gray-500 mt-1">Upload a screenshot to help us understand the issue better.</p>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <button type="submit" class="flex-1 bg-indigo-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-indigo-700 transition-colors focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            <i class="fas fa-paper-plane mr-2"></i>Submit Issue
+                        </button>
+                        <button type="button" onclick="history.back()" class="flex-1 bg-gray-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-700 transition-colors focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                            <i class="fas fa-arrow-left mr-2"></i>Back to Results
+                        </button>
+                    </div>
+                </form>
             </div>
-            {% endif %}
-            <h2 class="text-3xl font-extrabold text-indigo-700 mb-2 text-center tracking-tight">Contact / Report Issue</h2>
-            <p class="text-center text-gray-500 mb-6 text-sm sm:text-base">If you face any issue, please fill out the form below. You can also upload a screenshot for faster resolution.</p>
-            <form action="/contact" method="POST" enctype="multipart/form-data" class="space-y-6">
-                <div class="flex flex-col gap-1">
-                    <label for="admission" class="block text-sm font-semibold text-gray-700">Admission Number</label>
-                    <input type="text" name="admission" id="admission" required class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 transition-all duration-150 px-3 py-2 text-base" placeholder="Enter your admission number">
-                </div>
-                <div class="flex flex-col gap-1">
-                    <label for="user_email" class="block text-sm font-semibold text-gray-700">Your Email</label>
-                    <input type="email" name="user_email" id="user_email" required class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 transition-all duration-150 px-3 py-2 text-base" placeholder="Enter your email address">
-                </div>
-                <div class="flex flex-col gap-1">
-                    <label for="message" class="block text-sm font-semibold text-gray-700">Issue Message</label>
-                    <textarea name="message" id="message" rows="4" required class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 transition-all duration-150 px-3 py-2 text-base resize-none" placeholder="Describe your issue..."></textarea>
-                </div>
-                <div class="flex flex-col gap-1">
-                    <label for="screenshot" class="block text-sm font-semibold text-gray-700">Screenshot <span class="text-gray-400">(optional)</span></label>
-                    <input type="file" name="screenshot" id="screenshot" accept="image/png, image/jpeg" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-                </div>
-                <button type="submit" class="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold text-base rounded-xl shadow-lg hover:from-indigo-600 hover:to-purple-600 transition duration-150 ease-in-out flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                    Submit Issue
-                </button>
-            </form>
         </div>
     </main>
+
+    <footer class="bg-gray-800 text-gray-300 shadow-inner mt-auto">
+        <div class="container mx-auto px-6 py-8">
+            <div class="text-center text-sm">
+                <p>&copy; 2025 JNTUA Attendance App. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
 </body>
 </html>
