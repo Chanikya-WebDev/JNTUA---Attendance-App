@@ -45,21 +45,12 @@ REAL_ESTATE_LINKS = [
 ]
 
 def get_login_ad():
-    ad_target_url = os.environ.get("LOGIN_AD_TARGET_URL", "https://www.pixel2k26.in/")
-    ad_image_url = os.environ.get("LOGIN_AD_IMAGE_URL", "/static/data/pixel.png")
-    ad_title = os.environ.get("LOGIN_AD_TITLE", "Pixel 2K26")
-    ad_caption = os.environ.get("LOGIN_AD_CAPTION", "Click to visit pixel2k26.in")
-    ad_alt_text = os.environ.get("LOGIN_AD_ALT_TEXT", "Pixel 2K26 advertisement")
-
-    if ad_target_url and not ad_target_url.startswith(("http://", "https://")):
-        ad_target_url = f"https://{ad_target_url}"
-
     return {
-        "target_url": ad_target_url,
-        "image_url": ad_image_url,
-        "title": ad_title,
-        "caption": ad_caption,
-        "alt_text": ad_alt_text,
+        "target_url": "https://www.pixel2k26.in/",
+        "image_url": "/static/data/pixel.png",
+        "title": "Pixel 2K26",
+        "caption": "Click to visit pixel2k26.in",
+        "alt_text": "Pixel 2K26 advertisement",
     }
 
 def get_daily_link():
