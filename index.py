@@ -44,6 +44,24 @@ REAL_ESTATE_LINKS = [
     }
 ]
 
+def get_login_ad():
+    ad_target_url = os.environ.get("LOGIN_AD_TARGET_URL", "https://www.pixel2k26.in/")
+    ad_image_url = os.environ.get("LOGIN_AD_IMAGE_URL", "/static/data/pixel.png")
+    ad_title = os.environ.get("LOGIN_AD_TITLE", "Pixel 2K26")
+    ad_caption = os.environ.get("LOGIN_AD_CAPTION", "Click to visit pixel2k26.in")
+    ad_alt_text = os.environ.get("LOGIN_AD_ALT_TEXT", "Pixel 2K26 advertisement")
+
+    if ad_target_url and not ad_target_url.startswith(("http://", "https://")):
+        ad_target_url = f"https://{ad_target_url}"
+
+    return {
+        "target_url": ad_target_url,
+        "image_url": ad_image_url,
+        "title": ad_title,
+        "caption": ad_caption,
+        "alt_text": ad_alt_text,
+    }
+
 def get_daily_link():
     """Selects a link based on the current date so it stays stable for 24 hours."""
     today = datetime.date.today().strftime("%Y-%m-%d")
@@ -136,7 +154,8 @@ def login_page():
         if "query" in request.args:
             return redirect("/", code=301)
         daily_link = get_daily_link()
-        resp = make_response(render_template("index.html", featured_link=daily_link))
+        login_ad = get_login_ad()
+        resp = make_response(render_template("index.html", featured_link=daily_link, login_ad=login_ad))
         resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
         resp.headers["Pragma"]        = "no-cache"
         resp.headers["Expires"]       = "0"

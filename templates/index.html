@@ -648,6 +648,32 @@
       display: block;
       transition: opacity 0.15s;
     }
+
+    .ad-link {
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--card);
+      overflow: hidden;
+    }
+
+    .ad-image {
+      width: 100%;
+      display: block;
+      height: auto;
+      max-height: 280px;
+      object-fit: contain;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ad-content {
+      padding: 12px 14px;
+    }
+
+    @media (max-width: 480px) {
+      .ad-image { max-height: 200px; }
+    }
     
     .notice-title {
       font-size: 0.85rem;
@@ -805,10 +831,23 @@
         </button>
 
       </form> 
-        <div class="notice-body">
-            <a href="{{ featured_link.url }}" class="notice-link" target="_blank" rel="noopener">     
-            </a>
+      <div class="notice-board" aria-label="Sponsored advertisement">
+        <div class="notice-header">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm.75 4.5a.75.75 0 0 0-1.5 0v4a.75.75 0 0 0 1.5 0v-4zm-.75 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+          </svg>
+          Sponsored
         </div>
+        <div class="notice-body">
+          <a href="{{ login_ad.target_url }}" class="notice-link ad-link" target="_blank" rel="noopener sponsored">
+            <img src="{{ login_ad.image_url }}" alt="{{ login_ad.alt_text }}" class="ad-image" loading="lazy">
+            <div class="ad-content">
+              <div class="notice-title">{{ login_ad.title }}</div>
+              <div class="notice-desc">{{ login_ad.caption }}</div>
+            </div>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 
