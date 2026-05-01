@@ -6,8 +6,6 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
 load_dotenv()
-
-
 def get_conn():
     return psycopg2.connect(os.environ["DATABASE_URL"], sslmode="require")
 

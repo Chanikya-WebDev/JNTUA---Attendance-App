@@ -954,18 +954,18 @@
   });
 
   // ── Store original button text + prevent double submit ──────────────
-   form = document.querySelector("form");
-   btn  = document.querySelector("button[type='submit']");
+  const pageForm = document.querySelector("form");
+  const pageBtn  = document.querySelector("button[type='submit']");
 
-  if (btn) {
-    btn.dataset.originalText = btn.innerHTML;
+  if (pageBtn) {
+    pageBtn.dataset.originalText = pageBtn.innerHTML;
   }
 
-  if (form) {
-    form.addEventListener("submit", function () {
-      if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = btn.dataset.originalText; // keep text same
+  if (pageForm) {
+    pageForm.addEventListener("submit", function () {
+      if (pageBtn) {
+        pageBtn.disabled = true;
+        pageBtn.innerHTML = pageBtn.dataset.originalText; // keep text same
       }
     });
   }
