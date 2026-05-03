@@ -123,6 +123,36 @@ Deployed on **Vercel** with zero-config Python serverless support:
 3. Set environment variable: `SECRET_KEY`
 4. Deploy — Vercel picks up `vercel.json` and `runtime.txt` automatically
 
+### Important: Attendance Portal Anti-Bot Restriction
+
+The upstream attendance portal currently blocks direct server-side HTTP scraping from many serverless/data-center IPs.
+This app now relies on a browser-fingerprinted HTTP client (`curl_cffi`) instead of a headless browser runtime.
+For reliable production behavior, deploy with the dependencies installed in the same environment that runs the app.
+
+### Recommended Deployment (Render + Docker)
+
+This repository now includes:
+
+- `Dockerfile` (installs Python deps)
+- `render.yaml` (one-click Render blueprint)
+- `.dockerignore`
+
+Steps:
+
+1. Push the repository with these files.
+2. Create a new Render Web Service from the repo (it will detect `render.yaml`).
+3. Set required environment variables (`SECRET_KEY`, mail vars, `DATABASE_URL` if used).
+4. Deploy.
+
+### Run Locally with Docker
+
+```bash
+docker build -t jntua-attendance-app .
+docker run --rm -p 10000:10000 --env SECRET_KEY=dev-secret jntua-attendance-app
+```
+
+Then open: `http://localhost:10000`
+
 ---
 
 ## Contributing

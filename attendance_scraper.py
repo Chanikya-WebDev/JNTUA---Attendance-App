@@ -3,15 +3,66 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import concurrent.futures
 import threading
+from urllib.parse import urljoin
+
+try:
+    from curl_cffi import requests as browser_requests  # type: ignore[import-not-found]
+    CURL_CFFI_AVAILABLE = True
+except ImportError:
+    browser_requests = None
+    CURL_CFFI_AVAILABLE = False
 
 BASE_URL = "https://jntuaceastudents.classattendance.in/"
+
+
+def _create_session():
+    if CURL_CFFI_AVAILABLE:
+        return browser_requests.Session(impersonate="chrome120")
+    return requests.Session()
+
+
+def _looks_like_bot_block(text: str) -> bool:
+    lowered = (text or "").lower()
+    return "hello bot" in lowered or "inform the students access the actual website" in lowered
+
+
+def _blocked_login_message() -> str:
+    return (
+        "The attendance portal is blocking automated login requests in this runtime. "
+        "Deploy the app with curl_cffi installed or run it in a different environment."
+    )
+
+
+def _session_from_cookies(cookies: list) -> requests.Session:
+    session = requests.Session()
+    for cookie in cookies:
+        name = cookie.get("name")
+        value = cookie.get("value")
+        domain = cookie.get("domain")
+        path = cookie.get("path", "/")
+
+        if name and value:
+            session.cookies.set(name, value, domain=domain, path=path)
+
+    session.headers.update({
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/120.0.0.0 Safari/537.36"
+        ),
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+    })
+    return session
 
 # --------------------------------------------------
 # LOGIN
 # --------------------------------------------------
 
 def login(username: str, password: str) -> requests.Session:
-    session = requests.Session()
+    session = _create_session()
 
     session.headers.update({
         "User-Agent": (
@@ -29,26 +80,32 @@ def login(username: str, password: str) -> requests.Session:
         # Load login page
         login_page = session.get(BASE_URL, timeout=15, allow_redirects=True)
 
-        if login_page.status_code != 200 or not login_page.text:
+        if _looks_like_bot_block(login_page.text):
+            if not CURL_CFFI_AVAILABLE:
+                raise ValueError(
+                    "The attendance portal blocked direct requests and curl_cffi is not installed. "
+                    "Install requirements and redeploy the app."
+                )
+            raise ValueError(_blocked_login_message())
+
+        if login_page.status_code < 200 or login_page.status_code >= 400 or not login_page.text:
             raise ValueError("Failed to load login page.")
 
         soup = BeautifulSoup(login_page.text, "html.parser")
 
-        # Attempt to find secretcode 
-        secretcode = None
-        secret_input = soup.find("input", {"name": "secretcode"}) \
-            or soup.find("input", {"id": "secretcode"})
-
-        if secret_input and secret_input.get("value"):
-            secretcode = secret_input.get("value")
+        form = soup.find("form")
+        login_url = urljoin(BASE_URL, form.get("action", "")) if form else BASE_URL
 
         payload = {
             "username": username,
             "password": password,
         }
 
-        if secretcode:
-            payload["secretcode"] = secretcode
+        for hidden_input in soup.find_all("input", {"type": "hidden"}):
+            hidden_name = hidden_input.get("name")
+            hidden_value = hidden_input.get("value")
+            if hidden_name and hidden_value is not None:
+                payload[hidden_name] = hidden_value
 
         session.headers.update({
             "Content-Type": "application/x-www-form-urlencoded",
@@ -57,11 +114,14 @@ def login(username: str, password: str) -> requests.Session:
         })
 
         res = session.post(
-            BASE_URL,
+            login_url,
             data=payload,
             timeout=15,
             allow_redirects=True
         )
+
+        if _looks_like_bot_block(getattr(res, "text", "")):
+            raise ValueError(_blocked_login_message())
 
         if res.status_code != 200:
             raise ValueError("Login request failed.")
