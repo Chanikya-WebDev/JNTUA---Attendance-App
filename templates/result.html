@@ -7,8 +7,10 @@
   <meta name="description" content="Check your JNTUA student attendance online. View subject-wise attendance percentage, total classes, and attendance details instantly.">
   <meta name="keywords" content="JNTUA Attendance, JNTUA Student Attendance, JNTUA Attendance App, Attendance Checker, JNTUA College, Attendance Percentage">
   <meta name="author" content="JNTUA Attendance">
-  <!-- <link rel="icon" sizes="180x180" href="icon.png"> -->
   <title>Attendance Result — JNTUA</title>
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#7C3AED">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -586,6 +588,33 @@
       }
     }
   </style>
+
+    <style>
+      html {
+        color-scheme: light;
+        scroll-behavior: smooth;
+      }
+      body {
+        line-height: 1.5;
+        font-size: 16px;
+        text-rendering: optimizeLegibility;
+      }
+      :focus-visible {
+        outline: 3px solid #7C3AED;
+        outline-offset: 3px;
+      }
+      a, button, input, textarea, select {
+        -webkit-tap-highlight-color: transparent;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
 </head>
 <body>
 <div class="page">
@@ -593,10 +622,7 @@
   <a href="/" class="back-top">
     <i class="fas fa-arrow-left" style="font-size:10px;"></i> Back to Login
   </a>
-<div class="notice-body">
-            <a href="{{ featured_link.url }}" class="notice-link" target="_blank" rel="noopener">     
-            </a>
-        </div>
+
   <!-- HEADER -->
   <header class="site-header">
     <div class="eyebrow">
@@ -639,21 +665,11 @@
     <a href="/loh" class="btn btn-purple">
       <i class="fas fa-calendar" style="font-size:10px;"></i> Long Weekends
     </a>
-    <a href="/qp" class="btn btn-amber">
-      <i class="fas fa-calendar" style="font-size:10px;"></i> Question Papers
-    </a>
     <a href="/contact" class="btn btn-red">
       <i class="fas fa-exclamation-triangle" style="font-size:10px;"></i> Report Issue
     </a>
     <a href="/contributors" class="btn">
       <i class="fas fa-users" style="font-size:10px;"></i> Contributors
-    </a>
-    <a href="/download-apk" class="btn btn-green" onclick="return confirm('Installation Note\n\n' +
-                               'Android may show a warning when installing this app.\n' +
-                               'This is a normal system message for apps not downloaded from the Play Store.\n\n' +
-                               'Simply allow installation from this source and continue.\n' +
-                               'The app is safe to install and use.');">
-      <i class="fas fa-download" style="font-size:10px;"></i> Download Android App
     </a>
   </div>
 
@@ -775,11 +791,8 @@
         <a href="https://github.com/Chanikya-WebDev/JNTUA---Attendance-app" target="_blank" rel="noopener noreferrer">Contribute on GitHub</a>
     </div>
     <div style="font-size: 0.7rem;">
-        <a href="/local-opportunities" style="color: var(--muted); text-decoration: none;">Local Opportunities</a>
-        &nbsp;·&nbsp;
-        
+      </div>
     </div>
-  </div>
 
 </div>
 
@@ -805,6 +818,14 @@
 </div>
 </main>
 <script>
+  const attendanceData = {{ df | tojson }};
+  const attendanceMap = Object.fromEntries(
+    attendanceData.map(row => [row.Subject, row.Details || []])
+  );
+
+  sessionStorage.setItem("attendanceMap", JSON.stringify(attendanceMap));
+</script>
+<script>
   // Search
   const searchInput = document.getElementById('subject-search');
   const cards       = document.querySelectorAll('.subj-card');
@@ -828,35 +849,31 @@
   const modalTitle = document.getElementById('modalSubject');
   const modalBody  = document.getElementById('modalBody');
 
-  function openModal(subject) {
-    modalTitle.textContent = subject;
-    modalBody.innerHTML = `<div style="text-align:center; padding:32px; color:var(--muted); font-size:0.8rem;">
-      <i class="fas fa-spinner fa-spin" style="font-size:1.4rem; margin-bottom:10px; display:block;"></i>Loading…</div>`;
-    overlay.classList.remove('hidden');
+function openModal(subject) {
+  modalTitle.textContent = subject;
+  modalBody.innerHTML = `<div style="text-align:center; padding:32px; color:var(--muted); font-size:0.8rem;">
+    <i class="fas fa-spinner fa-spin" style="font-size:1.4rem; margin-bottom:10px; display:block;"></i>Loading…</div>`;
+  overlay.classList.remove('hidden');
 
-    const token = "{{ attendance_token if attendance_token else '' }}";
-    fetch(`/api/attendance?token=${encodeURIComponent(token)}&subject=${encodeURIComponent(subject)}`)
-      .then(r => r.json())
-      .then(data => {
-        if (data && data.details && data.details.length > 0) {
-          let rows = [...data.details].reverse().map((d, i) => {
-            const present = d.status.toLowerCase() === 'present';
-            return `<div class="modal-row">
-              <span class="modal-date">${d.date}</span>
-              <span class="pill ${present ? 'pill-green' : 'pill-red'}">
-                <i class="fas ${present ? 'fa-check' : 'fa-times'}" style="font-size:8px; margin-right:4px;"></i>${d.status}
-              </span>
-            </div>`;
-          }).join('');
-          modalBody.innerHTML = rows;
-        } else {
-          modalBody.innerHTML = `<div style="text-align:center; padding:32px; color:var(--muted); font-size:0.8rem;">No attendance records found.</div>`;
-        }
-      })
-      .catch(() => {
-        modalBody.innerHTML = `<div style="text-align:center; padding:32px; color:var(--red); font-size:0.8rem;">Failed to load details.</div>`;
-      });
+  const saved = sessionStorage.getItem("attendanceMap");
+  const map = saved ? JSON.parse(saved) : attendanceMap;
+  const details = map[subject] || [];
+
+  if (details.length > 0) {
+    const rows = [...details].reverse().map((d) => {
+      const present = String(d.status).toLowerCase() === 'present';
+      return `<div class="modal-row">
+        <span class="modal-date">${d.date}</span>
+        <span class="pill ${present ? 'pill-green' : 'pill-red'}">
+          <i class="fas ${present ? 'fa-check' : 'fa-times'}" style="font-size:8px; margin-right:4px;"></i>${d.status}
+        </span>
+      </div>`;
+    }).join('');
+    modalBody.innerHTML = rows;
+  } else {
+    modalBody.innerHTML = `<div style="text-align:center; padding:32px; color:var(--muted); font-size:0.8rem;">No attendance records found.</div>`;
   }
+}
 
   function closeModal() { overlay.classList.add('hidden'); }
 
@@ -872,14 +889,6 @@
     card.style.cursor = 'pointer';
   });
 
-  // Click on card to open modal
-  cards.forEach(card => {
-    card.addEventListener('click', () => {
-      const subject = card.dataset.subject;
-      if (subject) openModal(subject);
-    });
-    card.style.cursor = 'pointer';
-  });
 </script>
 
 </body>

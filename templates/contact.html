@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <link rel="icon" sizes="180x180" href="icon.png">
+   <link rel="icon" sizes="180x180" href="/icon.png">
     <title>Report Issue - JNTUA Attendance</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -11,10 +11,41 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <!-- google adsense ad code  -->
- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9831921446818794"
-     crossorigin="anonymous"></script>
-    <style>
+    <meta name="title" content="Report Issue - JNTUA Attendance">
+    <meta name="description" content="Report attendance portal issues, missing records, or app bugs through the JNTUA Attendance contact form.">
+    <meta name="keywords" content="JNTUA Attendance, report issue, attendance support, contact form, JNTUA portal">
+    <meta name="author" content="JNTUA Attendance">
+    <meta name="robots" content="index, follow">
+    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#7C3AED">
+    <link rel="canonical" href="https://jntua-attendance-app.vercel.app/contact">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jntua-attendance-app.vercel.app/contact">
+    <meta property="og:title" content="Report Issue - JNTUA Attendance">
+    <meta property="og:description" content="Report attendance portal issues, missing records, or app bugs through the JNTUA Attendance contact form.">
+    <meta property="og:image" content="https://jntua-attendance-app.vercel.app/icon.png">
+    <meta property="og:site_name" content="JNTUA Attendance">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Report Issue - JNTUA Attendance">
+    <meta name="twitter:description" content="Report attendance portal issues, missing records, or app bugs through the JNTUA Attendance contact form.">
+    <meta name="twitter:image" content="https://jntua-attendance-app.vercel.app/icon.png">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ContactPage",
+      "name": "Report Issue - JNTUA Attendance",
+      "url": "https://jntua-attendance-app.vercel.app/contact",
+      "description": "Report attendance portal issues, missing records, or app bugs through the JNTUA Attendance contact form.",
+      "inLanguage": "en-IN",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "JNTUA Attendance",
+        "url": "https://jntua-attendance-app.vercel.app/"
+      }
+    }
+    </script>
+
+  <style>
         @keyframes slideInFromTop {
             from {
                 opacity: 0;
@@ -68,6 +99,34 @@
             color: #9333ea;
         }
     </style>
+    
+    <style>
+      html {
+        color-scheme: light;
+        scroll-behavior: smooth;
+      }
+      body {
+        line-height: 1.5;
+        font-size: 16px;
+        text-rendering: optimizeLegibility;
+      }
+      :focus-visible {
+        outline: 3px solid #7C3AED;
+        outline-offset: 3px;
+      }
+      a, button, input, textarea, select {
+        -webkit-tap-highlight-color: transparent;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+    
 </head>
 <body class="bg-gray-50 flex flex-col min-h-screen" style="font-family: 'Inter', sans-serif;">
 
@@ -94,7 +153,8 @@
                 {% endwith %}
 
                 <form method="POST" action="/contact" enctype="multipart/form-data" class="space-y-5 sm:space-y-6" id="contactForm">
-                    <div class="form-field">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="form-field">
                         <label for="admission" class="block text-sm font-semibold text-gray-700 mb-2 transition-colors duration-200">
                             Admission Number <span class="text-red-500">*</span>
                         </label>
@@ -110,6 +170,7 @@
                         <input type="email" id="user_email" name="user_email" required
                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 text-sm sm:text-base bg-white hover:border-gray-400"
                                placeholder="Enter your email address">
+                               
                     </div>
 
                     <div class="form-field">
@@ -125,7 +186,7 @@
                         <label for="screenshot" class="block text-sm font-semibold text-gray-700 mb-2 transition-colors duration-200">
                             Screenshot (Optional)
                         </label>
-                        <input type="file" id="screenshot" name="screenshot" accept="image/*"
+                        <input type="file" id="screenshot" name="screenshot" accept=".png,.jpg,.jpeg,.webp"
                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 text-sm sm:text-base bg-white hover:border-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 file:transition-colors file:duration-200 cursor-pointer">
                         <p class="text-xs sm:text-sm text-gray-500 mt-2 flex items-center gap-1">
                             <i class="fas fa-info-circle text-purple-500"></i>

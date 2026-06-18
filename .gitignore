@@ -9,7 +9,7 @@ __pycache__/
 attendance_app/
 attendance_app/*
 env/
-*.env
+.venv
 
 # Logs
 *.log
@@ -37,3 +37,14 @@ instance/
 
 # Node modules
 node_modules/
+
+# Envitonment variables
+*.env
+! .env.example
+
+# uv ignore
+uv.lock
+pyproject.toml
+
+# ignore test files
+test.py
