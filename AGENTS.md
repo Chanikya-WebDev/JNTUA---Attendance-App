@@ -141,6 +141,7 @@ The old `ATTENDANCE_CACHE`/token lookup path has been removed from the current d
 `student_login()` currently:
 - creates a `requests.Session`
 - fetches the portal landing page
+- completes the Hostinger CDN SHA-256 browser challenge when it is presented
 - parses the login form with BeautifulSoup
 - extracts obfuscated JavaScript array values for the integrity token
 - falls back to hardcoded token defaults if extraction fails

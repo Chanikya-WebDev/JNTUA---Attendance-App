@@ -1,10 +1,108 @@
 import requests
 from bs4 import BeautifulSoup
+import hashlib
 import re
 import time
 import concurrent.futures
+from urllib.parse import urljoin
 
 BASE_URL = "https://jntuaceastudents.classattendance.in/"
+
+
+def _find_login_form(soup: BeautifulSoup):
+    """Find the portal login form without depending on one exact form id."""
+    login_form = soup.find("form", id="loginForm")
+    if login_form:
+        return login_form
+
+    for form in soup.find_all("form"):
+        has_username = form.find("input", attrs={"name": "username"})
+        has_password = form.find("input", attrs={"name": "password"})
+        if has_username and has_password:
+            return form
+
+    return None
+
+
+def _solve_hcdn_browser_challenge(
+    session: requests.Session,
+    response: requests.Response,
+) -> requests.Response:
+    """Complete Hostinger CDN's JavaScript SHA-256 browser verification."""
+    soup = BeautifulSoup(response.text, "html.parser")
+    challenge_script = soup.find(
+        "script",
+        src=lambda value: value and "hcdn-cgi/jschallenge" in value,
+    )
+    if response.status_code != 403 or not challenge_script:
+        return response
+
+    script_url = urljoin(response.url, challenge_script["src"])
+    script_response = session.get(
+        script_url,
+        headers={"Referer": response.url},
+        timeout=10,
+    )
+    script_response.raise_for_status()
+
+    cjs_match = re.search(
+        r"""const\s+cjs\s*=\s*(['"])(.*?)\1\s*;""",
+        script_response.text,
+    )
+    endpoint_match = re.search(
+        r"""const\s+jsChallengeUrl\s*=\s*(['"])(.*?)\1\s*;""",
+        script_response.text,
+    )
+    uri_match = re.search(
+        r"""const\s+uri\s*=\s*(['"])(.*?)\1\s*;""",
+        script_response.text,
+    )
+    if not cjs_match or not endpoint_match:
+        raise ValueError(
+            "University portal browser verification changed. Please try again later."
+        )
+
+    challenge = hashlib.sha256(cjs_match.group(2).encode("utf-8")).hexdigest()
+    validation_url = urljoin(response.url, endpoint_match.group(2))
+    time.sleep(3)
+    validation_response = session.post(
+        validation_url,
+        data={"challenge": challenge},
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Origin": f"{response.url.split('/', 3)[0]}//{response.url.split('/', 3)[2]}",
+            "Referer": response.url,
+        },
+        timeout=10,
+    )
+    if validation_response.status_code != 200:
+        raise ValueError(
+            "University portal blocked automated sign-in. Please try again later."
+        )
+
+    target_url = uri_match.group(2) if uri_match else response.url
+    return session.get(target_url, timeout=10)
+
+
+def _load_login_page(session: requests.Session):
+    response = session.get(BASE_URL, timeout=10)
+    response = _solve_hcdn_browser_challenge(session, response)
+
+    soup = BeautifulSoup(response.text, "html.parser")
+    login_form = _find_login_form(soup)
+    if login_form:
+        return response, login_form
+
+    if response.status_code == 403:
+        raise ValueError(
+            "University portal blocked this login request (HTTP 403). "
+            "Please try again later."
+        )
+
+    raise ValueError(
+        f"University portal login page is unavailable (HTTP {response.status_code})."
+    )
+
 
 # --------------------------------------------------
 # CORE AUTHENTICATION ENGINE
@@ -29,13 +127,8 @@ def student_login(username: str, password: str) -> requests.Session:
 
     try:
         # Step 1: Hit landing page to register backend session cookies
-        response = session.get(BASE_URL, timeout=10)
+        response, login_form = _load_login_page(session)
         html_content = response.text
-        
-        soup = BeautifulSoup(html_content, "html.parser")
-        login_form = soup.find("form", id="loginForm")
-        if not login_form:
-            raise ValueError("Portal structure changed or blocked (Missing loginForm).")
 
         # Step 2: Extract the obfuscated JavaScript arrays dynamically
         try:
