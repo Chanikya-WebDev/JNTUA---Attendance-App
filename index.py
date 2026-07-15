@@ -5,6 +5,7 @@ from flask import (
     redirect, send_from_directory, session,  make_response
 )
 from flask_wtf.csrf import CSRFProtect
+from werkzeug.utils import secure_filename
 
 from flask_mail import Mail, Message
 
@@ -14,6 +15,7 @@ from attendance_scraper import (
     get_subjects,
     fetch_attendance,
 )
+from reactions import reactions_bp, init_db
 
 
 app = Flask(__name__)
@@ -37,6 +39,10 @@ app.config["MAIL_DEFAULT_SENDER"] = os.environ.get("MAIL_DEFAULT_SENDER")
 
 mail = Mail(app)
 
+app.register_blueprint(reactions_bp)
+csrf.exempt(reactions_bp)
+init_db()
+
 # State stores
 ACTIVE_SESSIONS = {}
 
@@ -49,7 +55,7 @@ def login_page():
     if request.method == "GET":
         if "query" in request.args:
             return redirect("/", code=301)
-        resp = make_response(render_template("index.html"))
+        resp = make_response(render_template("service_down.html"))
         resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
         resp.headers["Pragma"]        = "no-cache"
         resp.headers["Expires"]       = "0"
