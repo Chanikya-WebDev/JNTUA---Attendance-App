@@ -99,6 +99,9 @@ The contact form accepts:
 
 The backend validates the request and sends the report via Flask-Mail when mail credentials are configured. If mail is unavailable, it falls back to a log file.
 
+### 6) Reactions storage
+The reaction bar uses SQLite only. On Vercel, it writes to a temporary runtime file so the app can start cleanly, but the counts are still ephemeral and can reset on cold starts.
+
 ---
 
 ## Repository Structure
@@ -237,6 +240,7 @@ Important:
 - Keep runtime state small and disposable.
 - Browser-side detail storage is preferable to a separate server-side attendance cache for this project size.
 - If traffic grows, move shared runtime state to Redis or another external store.
+- The reaction bar uses SQLite only. On Vercel, the database lives in a writable temp file, so reaction counts are not durable across cold starts.
 
 ---
 

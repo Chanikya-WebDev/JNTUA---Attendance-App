@@ -1,12 +1,16 @@
 import os
 import sqlite3
+import tempfile
 
 from flask import Blueprint, jsonify, request
 
 
 reactions_bp = Blueprint("reactions", __name__)
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reactions.db")
+DB_PATH = os.environ.get(
+    "REACTIONS_DB_PATH",
+    os.path.join(tempfile.gettempdir(), "jntua-reactions.db"),
+)
 
 REACTION_TYPES = ["love", "like", "fire", "laugh", "wow", "sad"]
 
@@ -18,6 +22,10 @@ def get_db():
 
 
 def init_db():
+    db_dir = os.path.dirname(DB_PATH)
+    if db_dir:
+        os.makedirs(db_dir, exist_ok=True)
+
     conn = get_db()
     try:
         conn.execute(
@@ -44,7 +52,7 @@ def init_db():
 
 
 def _read_counts(conn):
-    rows = conn.execute("SELECT type, count FROM reaction_counts").fetchall()
+    rows = conn.execute("SELECT type, count FROM reaction_counts ORDER BY type").fetchall()
     return {row["type"]: row["count"] for row in rows}
 
 
@@ -120,6 +128,6 @@ def react():
             conn.commit()
 
         counts = _read_counts(conn)
-        return jsonify({"counts": counts, "selected": new_type})
+        return jsonify({"counts": counts, "selected": new_type if new_type else None})
     finally:
         conn.close()
