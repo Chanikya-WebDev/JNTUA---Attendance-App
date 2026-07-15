@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Service Notice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --colors-primary: #0f62fe;
+    --colors-blue-60: #0043ce;
+    --colors-blue-80: #002d9c;
+    --colors-blue-hover: #0353e9;
+    --colors-canvas: #ffffff;
+    --colors-surface-1: #f4f4f4;
+    --colors-surface-2: #e0e0e0;
+    --colors-hairline: #e0e0e0;
+    --colors-hairline-strong: #161616;
+    --colors-inverse-canvas: #161616;
+    --colors-inverse-surface-1: #262626;
+    --colors-ink: #161616;
+    --colors-ink-muted: #525252;
+    --colors-ink-subtle: #8c8c8c;
+    --colors-inverse-ink: #ffffff;
+    --colors-inverse-ink-muted: #c6c6c6;
+    --colors-semantic-warning: #f1c21b;
+    --font: 'IBM Plex Sans', Helvetica Neue, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--colors-canvas);
+    font-family: var(--font);
+    color: var(--colors-ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Warning mark */
+  .warning-mark {
+    display: flex;
+    justify-content: center;
+    padding-top: 64px;
+  }
+  .warning-mark .icon-frame {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--colors-hairline);
+    background: var(--colors-surface-1);
+  }
+  .warning-mark svg {
+    width: 24px;
+    height: 24px;
+  }
+  .warning-mark svg path {
+    fill: var(--colors-ink);
+  }
+  .warning-mark svg rect {
+    fill: none;
+  }
+
+  /* Layout */
+  main {
+    max-width: 1056px;
+    margin: 0 auto;
+    padding: 32px 32px 0;
+  }
+
+  .eyebrow {
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.16px;
+    color: var(--colors-primary);
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .eyebrow::before {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--colors-semantic-warning);
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+
+  h1 {
+    font-size: 60px;
+    font-weight: 300;
+    line-height: 1.17;
+    letter-spacing: -0.4px;
+    color: var(--colors-ink);
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .lead {
+    margin: 24px auto 0;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--colors-ink-muted);
+    max-width: 620px;
+    text-align: center;
+  }
+
+  /* Divider row */
+  .rule {
+    margin-top: 48px;
+    border-top: 1px solid var(--colors-hairline);
+  }
+
+  /* Feature card style body */
+  .body-block {
+    margin-top: 48px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .feature-card {
+    background: var(--colors-canvas);
+    border: 1px solid var(--colors-hairline);
+    padding: 32px;
+  }
+  .feature-card .card-title {
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.33;
+    color: var(--colors-ink);
+    margin-bottom: 16px;
+  }
+  .feature-card p {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.16px;
+    color: var(--colors-ink-muted);
+  }
+  .feature-card p + p { margin-top: 12px; }
+
+  .feature-card.elevated {
+    background: var(--colors-surface-1);
+  }
+
+  .status-list {
+    margin-top: 16px;
+    list-style: none;
+  }
+  .status-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #ebebeb;
+    font-size: 14px;
+    letter-spacing: 0.16px;
+    color: var(--colors-ink-muted);
+  }
+  .status-list li:first-child { border-top: 1px solid #ebebeb; }
+  .status-list .dot {
+    width: 6px;
+    height: 6px;
+    background: var(--colors-primary);
+    flex: 0 0 auto;
+  }
+  .status-list strong {
+    color: var(--colors-ink);
+    font-weight: 400;
+  }
+
+  /* CTA banner */
+  .cta-banner {
+    margin-top: 48px;
+    background: var(--colors-primary);
+    color: var(--colors-inverse-ink, #ffffff);
+    padding: 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .cta-banner h2 {
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 1.25;
+    max-width: 460px;
+  }
+  .cta-banner p {
+    margin-top: 8px;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 0.16px;
+    color: #d0e2ff;
+    max-width: 460px;
+  }
+  .button-tertiary-inverse {
+    background: transparent;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+    font-size: 14px;
+    letter-spacing: 0.16px;
+    padding: 12px 16px;
+    white-space: nowrap;
+    cursor: default;
+  }
+
+  /* Quote block */
+  .quote-block {
+    margin-top: 96px;
+    padding: 64px 0;
+    border-top: 1px solid var(--colors-hairline);
+    text-align: center;
+  }
+  .quote-mark {
+    font-size: 42px;
+    font-weight: 300;
+    color: var(--colors-primary);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+  blockquote {
+    font-size: 32px;
+    font-weight: 300;
+    line-height: 1.35;
+    letter-spacing: -0.2px;
+    color: var(--colors-ink);
+    max-width: 780px;
+    margin: 0 auto;
+  }
+  .quote-attribution {
+    margin-top: 24px;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.16px;
+    color: var(--colors-ink-subtle);
+  }
+  .quote-attribution::before {
+    content: "— ";
+  }
+
+  /* ── REACTION BAR ── */
+  .reaction-block {
+    margin-top: 48px;
+    border: 1px solid var(--colors-hairline);
+    padding: 32px;
+    text-align: center;
+  }
+  .reaction-block .card-title {
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.33;
+    color: var(--colors-ink);
+    margin-bottom: 4px;
+  }
+  .reaction-block .card-sub {
+    font-size: 14px;
+    color: var(--colors-ink-subtle);
+    letter-spacing: 0.16px;
+    margin-bottom: 24px;
+  }
+
+  .reaction-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .reaction-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 84px;
+    padding: 14px 12px 12px;
+    background: var(--colors-canvas);
+    border: 1px solid var(--colors-hairline);
+    cursor: pointer;
+    font-family: var(--font);
+    transition: border-color 0.12s, background 0.12s, transform 0.08s;
+  }
+  .reaction-btn:hover {
+    border-color: var(--colors-primary);
+    background: var(--colors-surface-1);
+  }
+  .reaction-btn:active { transform: translateY(1px); }
+
+  .reaction-btn.selected {
+    border-color: var(--colors-primary);
+    background: #edf5ff;
+  }
+
+  .reaction-btn .emoji {
+    font-size: 26px;
+    line-height: 1;
+  }
+  .reaction-btn .label {
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.16px;
+    color: var(--colors-ink-muted);
+  }
+  .reaction-btn.selected .label {
+    color: var(--colors-primary);
+  }
+  .reaction-btn .count {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--colors-ink);
+    min-height: 16px;
+  }
+
+  .reaction-note {
+    margin-top: 20px;
+    font-size: 12px;
+    color: var(--colors-ink-subtle);
+    letter-spacing: 0.16px;
+  }
+
+  @media (max-width: 672px) {
+    h1 { font-size: 36px; letter-spacing: 0; }
+    .body-block { grid-template-columns: 1fr; }
+    blockquote { font-size: 24px; }
+    main { padding-top: 24px; }
+    .warning-mark { padding-top: 40px; }
+    .reaction-btn { min-width: 72px; padding: 12px 8px 10px; }
+    .reaction-btn .emoji { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="warning-mark">
+    <div class="icon-frame">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+        <path id="warning--01" d="M31,29.36H1c-0.128,0-0.248-0.069-0.312-0.181c-0.064-0.111-0.064-0.248,0-0.359l15-26
+          c0.129-0.224,0.495-0.224,0.624,0l15,26c0.064,0.111,0.064,0.248,0,0.359S31.129,29.36,31,29.36z M1.624,28.64h28.753L16,3.72
+          L1.624,28.64z M16.36,20h-0.72V10h0.72V20z M16,23c-0.552,0-1,0.448-1,1s0.448,1,1,1s1-0.448,1-1S16.552,23,16,23z"/>
+        <rect id="_Transparent_Rectangle" width="32" height="32"/>
+      </svg>
+    </div>
+  </div>
+
+  <main>
+    <div class="eyebrow">System status</div>
+    <h1>We're fixing a bug behind the scenes.</h1>
+    <p class="lead">
+      Dear Users, thank you for your valuable time with us. Currently, there is a significant bug
+      in our system, and our team is working day and night to resolve it as quickly as possible.
+    </p>
+
+    <div class="rule"></div>
+
+    <div class="cta-banner">
+      <div>
+        <h2>Stay tuned.</h2>
+        <p>We're currently developing an Android application for this website. We'll notify you as soon as the app is ready for release. Thank you for your patience and support!</p>
+      </div>
+    </div>
+
+    <!-- REACTION BAR -->
+
+
+    <div class="quote-block">
+      <div class="quote-mark">&ldquo;</div>
+      <blockquote>
+        If one Alluri Sitarama Raju falls, hundreds of Sitarama Rajus will be born.
+      </blockquote>
+      <div class="quote-attribution">Jale Chanikya</div>
+    </div>
+        <div class="reaction-block">
+      <div class="card-title">How do you feel about this?</div>
+      <div class="card-sub">Tap a reaction — you can change your mind anytime.</div>
+
+      <div class="reaction-row" id="reactionRow">
+        <button class="reaction-btn" data-type="like">
+          <span class="emoji">👍</span>
+          <span class="label">Like</span>
+          <span class="count" data-count="like">0</span>
+        </button>
+        <button class="reaction-btn" data-type="love">
+          <span class="emoji">❤️</span>
+          <span class="label">Love</span>
+          <span class="count" data-count="love">0</span>
+        </button>
+        <button class="reaction-btn" data-type="fire">
+          <span class="emoji">🔥</span>
+          <span class="label">Fire</span>
+          <span class="count" data-count="fire">0</span>
+        </button>
+        <button class="reaction-btn" data-type="laugh">
+          <span class="emoji">😂</span>
+          <span class="label">Laugh</span>
+          <span class="count" data-count="laugh">0</span>
+        </button>
+        <button class="reaction-btn" data-type="wow">
+          <span class="emoji">😮</span>
+          <span class="label">Wow</span>
+          <span class="count" data-count="wow">0</span>
+        </button>
+        <button class="reaction-btn" data-type="sad">
+          <span class="emoji">😢</span>
+          <span class="label">Sad</span>
+          <span class="count" data-count="sad">0</span>
+        </button>
+      </div>
+
+      <div class="reaction-note">One reaction per device. Click your reaction again to remove it.</div>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      // ── Get/create a per-browser device id ──
+      function getDeviceId() {
+        var key = 'reaction_device_id';
+        var id = localStorage.getItem(key);
+        if (!id) {
+          id = (crypto.randomUUID ? crypto.randomUUID() :
+                'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                  var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                  return v.toString(16);
+                }));
+          localStorage.setItem(key, id);
+        }
+        return id;
+      }
+
+      var deviceId = getDeviceId();
+      var row = document.getElementById('reactionRow');
+      var buttons = row.querySelectorAll('.reaction-btn');
+
+      function renderCounts(counts) {
+        buttons.forEach(function (btn) {
+          var type = btn.dataset.type;
+          var el = btn.querySelector('[data-count="' + type + '"]');
+          el.textContent = counts[type] != null ? counts[type] : 0;
+        });
+      }
+
+      function renderSelected(selected) {
+        buttons.forEach(function (btn) {
+          btn.classList.toggle('selected', btn.dataset.type === selected);
+        });
+      }
+
+      // ── Load current state ──
+      fetch('/api/reactions?device_id=' + encodeURIComponent(deviceId))
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          renderCounts(data.counts || {});
+          renderSelected(data.selected || null);
+        })
+        .catch(function (err) { console.error('Failed to load reactions', err); });
+
+      // ── Handle clicks ──
+      buttons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var type = btn.dataset.type;
+          var isSelected = btn.classList.contains('selected');
+          var newType = isSelected ? null : type; // click again to remove
+
+          buttons.forEach(function (b) { b.disabled = true; });
+
+          fetch('/api/react', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ device_id: deviceId, type: newType })
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+              if (data.error) { console.error(data.error); return; }
+              renderCounts(data.counts || {});
+              renderSelected(data.selected || null);
+            })
+            .catch(function (err) { console.error('Failed to save reaction', err); })
+            .finally(function () {
+              buttons.forEach(function (b) { b.disabled = false; });
+            });
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>

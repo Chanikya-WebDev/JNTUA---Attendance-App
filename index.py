@@ -1,10 +1,12 @@
 import os
+import tempfile
 from datetime import datetime
 from flask import (
     Flask, flash, render_template, request,
     redirect, send_from_directory, session,  make_response
 )
 from flask_wtf.csrf import CSRFProtect
+from werkzeug.utils import secure_filename
 
 from flask_mail import Mail, Message
 
@@ -14,6 +16,7 @@ from attendance_scraper import (
     get_subjects,
     fetch_attendance,
 )
+from reactions import reactions_bp, init_db
 
 
 app = Flask(__name__)
@@ -35,7 +38,13 @@ app.config["MAIL_USERNAME"] = os.environ.get("MAIL_USERNAME")
 app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASSWORD")
 app.config["MAIL_DEFAULT_SENDER"] = os.environ.get("MAIL_DEFAULT_SENDER")
 
+ISSUES_LOG_PATH = os.path.join(tempfile.gettempdir(), "issues.log")
+
 mail = Mail(app)
+
+app.register_blueprint(reactions_bp)
+csrf.exempt(reactions_bp)
+init_db()
 
 # State stores
 ACTIVE_SESSIONS = {}
@@ -49,7 +58,7 @@ def login_page():
     if request.method == "GET":
         if "query" in request.args:
             return redirect("/", code=301)
-        resp = make_response(render_template("index.html"))
+        resp = make_response(render_template("service_down.html"))
         resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
         resp.headers["Pragma"]        = "no-cache"
         resp.headers["Expires"]       = "0"
@@ -166,6 +175,7 @@ def contact():
             admission = request.form.get("admission")
             email = request.form.get("user_email")
             message = request.form.get("message")
+            file_data = b""
 
             if not admission or not email or not message:
                 flash("All fields are required.", "error")
@@ -174,7 +184,6 @@ def contact():
             screenshot = request.files.get("screenshot")
 
             if screenshot:
-                file_data=b""
                 if not allowed_file(screenshot.filename):
                     flash("Only PNG, JPG, JPEG and WEBP allowed.", "error")
                     return redirect("/contact")
@@ -209,11 +218,11 @@ def contact():
                         mail.send(msg)
                     flash("Issue submitted successfully!", "success")
                 except:
-                    with open("issues.log", "a", encoding="utf-8") as f:
+                    with open(ISSUES_LOG_PATH, "a", encoding="utf-8") as f:
                         f.write(issue_data)
                     flash("Issue logged successfully to system storage.", "success")
             else:
-                with open("issues.log", "a", encoding="utf-8") as f:
+                with open(ISSUES_LOG_PATH, "a", encoding="utf-8") as f:
                     f.write(issue_data)
                 flash("Issue logged successfully to system storage.", "success")
             

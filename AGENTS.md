@@ -76,7 +76,7 @@ When facts conflict, use this priority order:
 At the time this file was updated, the active Flask routes were:
 
 - `/`
-  - GET: render login page
+  - GET: render the service-down notice page
   - POST: attempt portal login and store session state
 - `/dashboard`
   - Scrapes attendance and renders the result dashboard
@@ -87,6 +87,10 @@ At the time this file was updated, the active Flask routes were:
   - Contributors page with contributors github,linkedin,email details
 - `/loh`
   - Holiday page
+- `/api/reactions`
+  - GET: return global reaction counts plus the current device selection
+- `/api/react`
+  - POST: update a device reaction and persist the global counts in SQLite
 - `/robots.txt`
 - `/sitemap.xml`
 - `/icon.png`
