@@ -48,6 +48,8 @@ init_db()
 
 # State stores
 ACTIVE_SESSIONS = {}
+APK_FILENAME = "JNTUA-Attendance-Application.apk"
+APK_PATH = os.path.join(app.root_path, APK_FILENAME)
 
 # --------------------------------------------------
 # ROUTES
@@ -58,7 +60,10 @@ def login_page():
     if request.method == "GET":
         if "query" in request.args:
             return redirect("/", code=301)
-        resp = make_response(render_template("service_down.html"))
+        apk_size = None
+        if os.path.isfile(APK_PATH):
+            apk_size = f"{os.path.getsize(APK_PATH) / (1024 * 1024):.1f} MB"
+        resp = make_response(render_template("service_down.html", apk_size=apk_size))
         resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
         resp.headers["Pragma"]        = "no-cache"
         resp.headers["Expires"]       = "0"
@@ -88,6 +93,14 @@ def login_page():
     except Exception as e:
         flash(str(e), "error")
         return redirect("/")                   
+
+
+@app.route("/downloads/JNTUA-Attendance-Application.apk")
+def download_apk():
+    """Serve the official Android package through the Flask/Vercel handler."""
+    if not os.path.isfile(APK_PATH):
+        return render_template("error.html", error_message="The APK is currently unavailable.", back_url="/"), 404
+    return send_from_directory(app.root_path, APK_FILENAME, as_attachment=True)
 
 
 @app.route("/dashboard", methods=["GET"])

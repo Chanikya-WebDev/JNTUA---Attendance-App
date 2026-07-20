@@ -76,8 +76,10 @@ When facts conflict, use this priority order:
 At the time this file was updated, the active Flask routes were:
 
 - `/`
-  - GET: render the service-down notice page
-  - POST: attempt portal login and store session state
+  - GET: render the Android app announcement/download page
+  - POST: retain the legacy portal-login flow (no longer exposed by the landing page UI)
+- `/downloads/JNTUA-Attendance-Application.apk`
+  - GET: download the official Android APK
 - `/dashboard`
   - Scrapes attendance and renders the result dashboard
 - `/contact`

@@ -1,494 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Service Notice</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --colors-primary: #0f62fe;
-    --colors-blue-60: #0043ce;
-    --colors-blue-80: #002d9c;
-    --colors-blue-hover: #0353e9;
-    --colors-canvas: #ffffff;
-    --colors-surface-1: #f4f4f4;
-    --colors-surface-2: #e0e0e0;
-    --colors-hairline: #e0e0e0;
-    --colors-hairline-strong: #161616;
-    --colors-inverse-canvas: #161616;
-    --colors-inverse-surface-1: #262626;
-    --colors-ink: #161616;
-    --colors-ink-muted: #525252;
-    --colors-ink-subtle: #8c8c8c;
-    --colors-inverse-ink: #ffffff;
-    --colors-inverse-ink-muted: #c6c6c6;
-    --colors-semantic-warning: #f1c21b;
-    --font: 'IBM Plex Sans', Helvetica Neue, Arial, sans-serif;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  html, body {
-    background: var(--colors-canvas);
-    font-family: var(--font);
-    color: var(--colors-ink);
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* Warning mark */
-  .warning-mark {
-    display: flex;
-    justify-content: center;
-    padding-top: 64px;
-  }
-  .warning-mark .icon-frame {
-    width: 56px;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--colors-hairline);
-    background: var(--colors-surface-1);
-  }
-  .warning-mark svg {
-    width: 24px;
-    height: 24px;
-  }
-  .warning-mark svg path {
-    fill: var(--colors-ink);
-  }
-  .warning-mark svg rect {
-    fill: none;
-  }
-
-  /* Layout */
-  main {
-    max-width: 1056px;
-    margin: 0 auto;
-    padding: 32px 32px 0;
-  }
-
-  .eyebrow {
-    font-size: 14px;
-    font-weight: 400;
-    letter-spacing: 0.16px;
-    color: var(--colors-primary);
-    margin-bottom: 16px;
-    text-align: center;
-  }
-  .eyebrow::before {
-    content: "";
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    background: var(--colors-semantic-warning);
-    margin-right: 10px;
-    vertical-align: middle;
-  }
-
-  h1 {
-    font-size: 60px;
-    font-weight: 300;
-    line-height: 1.17;
-    letter-spacing: -0.4px;
-    color: var(--colors-ink);
-    max-width: 720px;
-    margin: 0 auto;
-    text-align: center;
-  }
-
-  .lead {
-    margin: 24px auto 0;
-    font-size: 20px;
-    font-weight: 400;
-    line-height: 1.4;
-    color: var(--colors-ink-muted);
-    max-width: 620px;
-    text-align: center;
-  }
-
-  /* Divider row */
-  .rule {
-    margin-top: 48px;
-    border-top: 1px solid var(--colors-hairline);
-  }
-
-  /* Feature card style body */
-  .body-block {
-    margin-top: 48px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-  }
-
-  .feature-card {
-    background: var(--colors-canvas);
-    border: 1px solid var(--colors-hairline);
-    padding: 32px;
-  }
-  .feature-card .card-title {
-    font-size: 24px;
-    font-weight: 400;
-    line-height: 1.33;
-    color: var(--colors-ink);
-    margin-bottom: 16px;
-  }
-  .feature-card p {
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 1.5;
-    letter-spacing: 0.16px;
-    color: var(--colors-ink-muted);
-  }
-  .feature-card p + p { margin-top: 12px; }
-
-  .feature-card.elevated {
-    background: var(--colors-surface-1);
-  }
-
-  .status-list {
-    margin-top: 16px;
-    list-style: none;
-  }
-  .status-list li {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    padding: 12px 0;
-    border-bottom: 1px solid #ebebeb;
-    font-size: 14px;
-    letter-spacing: 0.16px;
-    color: var(--colors-ink-muted);
-  }
-  .status-list li:first-child { border-top: 1px solid #ebebeb; }
-  .status-list .dot {
-    width: 6px;
-    height: 6px;
-    background: var(--colors-primary);
-    flex: 0 0 auto;
-  }
-  .status-list strong {
-    color: var(--colors-ink);
-    font-weight: 400;
-  }
-
-  /* CTA banner */
-  .cta-banner {
-    margin-top: 48px;
-    background: var(--colors-primary);
-    color: var(--colors-inverse-ink, #ffffff);
-    padding: 48px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 32px;
-    flex-wrap: wrap;
-  }
-  .cta-banner h2 {
-    font-size: 32px;
-    font-weight: 400;
-    line-height: 1.25;
-    max-width: 460px;
-  }
-  .cta-banner p {
-    margin-top: 8px;
-    font-size: 16px;
-    font-weight: 400;
-    letter-spacing: 0.16px;
-    color: #d0e2ff;
-    max-width: 460px;
-  }
-  .button-tertiary-inverse {
-    background: transparent;
-    border: 1px solid #ffffff;
-    color: #ffffff;
-    font-size: 14px;
-    letter-spacing: 0.16px;
-    padding: 12px 16px;
-    white-space: nowrap;
-    cursor: default;
-  }
-
-  /* Quote block */
-  .quote-block {
-    margin-top: 96px;
-    padding: 64px 0;
-    border-top: 1px solid var(--colors-hairline);
-    text-align: center;
-  }
-  .quote-mark {
-    font-size: 42px;
-    font-weight: 300;
-    color: var(--colors-primary);
-    line-height: 1;
-    margin-bottom: 16px;
-  }
-  blockquote {
-    font-size: 32px;
-    font-weight: 300;
-    line-height: 1.35;
-    letter-spacing: -0.2px;
-    color: var(--colors-ink);
-    max-width: 780px;
-    margin: 0 auto;
-  }
-  .quote-attribution {
-    margin-top: 24px;
-    font-size: 14px;
-    font-weight: 400;
-    letter-spacing: 0.16px;
-    color: var(--colors-ink-subtle);
-  }
-  .quote-attribution::before {
-    content: "— ";
-  }
-
-  /* ── REACTION BAR ── */
-  .reaction-block {
-    margin-top: 48px;
-    border: 1px solid var(--colors-hairline);
-    padding: 32px;
-    text-align: center;
-  }
-  .reaction-block .card-title {
-    font-size: 24px;
-    font-weight: 400;
-    line-height: 1.33;
-    color: var(--colors-ink);
-    margin-bottom: 4px;
-  }
-  .reaction-block .card-sub {
-    font-size: 14px;
-    color: var(--colors-ink-subtle);
-    letter-spacing: 0.16px;
-    margin-bottom: 24px;
-  }
-
-  .reaction-row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px;
-  }
-
-  .reaction-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    min-width: 84px;
-    padding: 14px 12px 12px;
-    background: var(--colors-canvas);
-    border: 1px solid var(--colors-hairline);
-    cursor: pointer;
-    font-family: var(--font);
-    transition: border-color 0.12s, background 0.12s, transform 0.08s;
-  }
-  .reaction-btn:hover {
-    border-color: var(--colors-primary);
-    background: var(--colors-surface-1);
-  }
-  .reaction-btn:active { transform: translateY(1px); }
-
-  .reaction-btn.selected {
-    border-color: var(--colors-primary);
-    background: #edf5ff;
-  }
-
-  .reaction-btn .emoji {
-    font-size: 26px;
-    line-height: 1;
-  }
-  .reaction-btn .label {
-    font-size: 12px;
-    font-weight: 400;
-    letter-spacing: 0.16px;
-    color: var(--colors-ink-muted);
-  }
-  .reaction-btn.selected .label {
-    color: var(--colors-primary);
-  }
-  .reaction-btn .count {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--colors-ink);
-    min-height: 16px;
-  }
-
-  .reaction-note {
-    margin-top: 20px;
-    font-size: 12px;
-    color: var(--colors-ink-subtle);
-    letter-spacing: 0.16px;
-  }
-
-  @media (max-width: 672px) {
-    h1 { font-size: 36px; letter-spacing: 0; }
-    .body-block { grid-template-columns: 1fr; }
-    blockquote { font-size: 24px; }
-    main { padding-top: 24px; }
-    .warning-mark { padding-top: 40px; }
-    .reaction-btn { min-width: 72px; padding: 12px 8px 10px; }
-    .reaction-btn .emoji { font-size: 22px; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Download the official JNTUA Attendance Android app for secure, fast attendance access.">
+  <meta name="theme-color" content="#0b4db9">
+  <link rel="icon" href="/icon.png" type="image/png">
+  <title>JNTUA Attendance App for Android</title>
+  <style>
+    :root { --blue:#0b4db9; --blue-deep:#06357f; --sky:#eaf4ff; --ink:#10213d; --muted:#63728a; --line:rgba(24,81,166,.14); --white:#fff; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; min-width:320px; color:var(--ink); font:16px/1.6 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; background:#f6f9fe; overflow-x:hidden; }
+    body::before, body::after { content:""; position:fixed; z-index:-1; border-radius:50%; filter:blur(8px); pointer-events:none; }
+    body::before { width:38rem; height:38rem; background:rgba(66,153,255,.22); top:-16rem; left:-12rem; }
+    body::after { width:30rem; height:30rem; background:rgba(16,74,181,.13); right:-12rem; top:19rem; }
+    a { color:inherit; }
+    .container { width:min(1120px, calc(100% - 40px)); margin:auto; }
+    .nav { display:flex; align-items:center; justify-content:space-between; padding:23px 0; }
+    .brand { display:flex; align-items:center; gap:10px; text-decoration:none; font-weight:800; letter-spacing:-.02em; }
+    .brand-mark { display:grid; place-items:center; width:38px; height:38px; border-radius:12px; color:white; background:linear-gradient(135deg,#1171e9,#073d92); box-shadow:0 8px 16px rgba(11,77,185,.25); }
+    .nav-link { color:var(--blue); font-weight:700; text-decoration:none; font-size:.92rem; }
+    .hero { min-height:610px; display:grid; grid-template-columns:1.05fr .95fr; align-items:center; gap:56px; padding:54px 0 76px; }
+    .eyebrow { display:inline-flex; align-items:center; gap:8px; margin-bottom:16px; padding:7px 12px; border:1px solid var(--line); border-radius:999px; color:var(--blue); background:rgba(255,255,255,.66); font-size:.78rem; font-weight:800; }
+    .eyebrow span { width:7px; height:7px; border-radius:50%; background:#36b96d; box-shadow:0 0 0 4px rgba(54,185,109,.16); }
+    h1 { max-width:650px; margin:0; font-size:clamp(2.55rem,5vw,4.6rem); line-height:1.06; letter-spacing:-.055em; }
+    .hero p { max-width:610px; margin:24px 0 29px; color:var(--muted); font-size:clamp(1rem,1.6vw,1.14rem); }
+    .actions { display:flex; flex-wrap:wrap; gap:12px; }
+    .button { display:inline-flex; align-items:center; justify-content:center; gap:9px; min-height:48px; padding:0 19px; border:1px solid transparent; border-radius:14px; font:inherit; font-size:.94rem; font-weight:800; text-decoration:none; transition:transform .2s ease, box-shadow .2s ease, background .2s ease; }
+    .button:hover { transform:translateY(-3px); }
+    .button.primary { color:white; background:linear-gradient(135deg,#116be0,#063b92); box-shadow:0 13px 24px rgba(8,66,159,.25); }
+    .button.primary:hover { box-shadow:0 17px 28px rgba(8,66,159,.34); }
+    .button.secondary { border-color:var(--line); color:var(--blue-deep); background:rgba(255,255,255,.72); }
+    .meta { display:flex; flex-wrap:wrap; gap:19px; margin-top:25px; color:var(--muted); font-size:.83rem; }
+    .meta strong { color:var(--ink); }
+    .phone-stage { position:relative; display:grid; place-items:center; min-height:470px; }
+    .orb { position:absolute; width:355px; height:355px; border-radius:50%; background:linear-gradient(135deg,#b9ddff,#d8eaff); }
+    .phone { position:relative; width:242px; padding:10px; border:7px solid #162741; border-radius:37px; background:#162741; box-shadow:0 28px 58px rgba(14,44,95,.3), inset 0 0 0 1px rgba(255,255,255,.22); animation:float 4.5s ease-in-out infinite; }
+    .speaker { position:absolute; z-index:2; top:17px; left:50%; width:72px; height:18px; transform:translateX(-50%); border-radius:0 0 13px 13px; background:#162741; }
+    .screen { min-height:448px; overflow:hidden; padding:37px 15px 16px; border-radius:24px; background:linear-gradient(155deg,#eff8ff 0%,#d4e9ff 100%); }
+    .app-title { font-weight:900; font-size:.94rem; color:#0b4db9; }
+    .app-sub { color:#70809a; font-size:.62rem; }
+    .app-card { margin-top:17px; padding:14px; border-radius:15px; background:white; box-shadow:0 8px 16px rgba(38,91,156,.1); }
+    .app-card small { color:#75839a; font-weight:700; font-size:.58rem; }
+    .percent { display:flex; align-items:end; justify-content:space-between; margin:4px 0 10px; color:#103d83; font-size:1.7rem; font-weight:900; }
+    .percent span { color:#26a567; font-size:.62rem; }
+    .progress { height:7px; overflow:hidden; border-radius:9px; background:#dbe9f7; }.progress i { display:block; width:82%; height:100%; border-radius:inherit; background:linear-gradient(90deg,#1a72e4,#37a0ff); }
+    .subject { display:flex; justify-content:space-between; padding:11px 0; border-bottom:1px solid #edf2f7; font-size:.64rem; font-weight:800; }.subject:last-child { border:0; }.subject b { color:#168359; }
+    .section { padding:78px 0; }
+    .section-heading { max-width:690px; margin:0 auto 36px; text-align:center; }.section-heading h2 { margin:0; font-size:clamp(1.85rem,3vw,2.65rem); letter-spacing:-.04em; }.section-heading p { margin:10px 0 0; color:var(--muted); }
+    .glass { border:1px solid rgba(255,255,255,.78); background:rgba(255,255,255,.68); box-shadow:0 12px 35px rgba(16,58,122,.08); backdrop-filter:blur(12px); }
+    .features { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }.feature { padding:25px 20px; border-radius:20px; transition:transform .25s ease, box-shadow .25s ease; }.feature:hover { transform:translateY(-7px); box-shadow:0 20px 37px rgba(16,58,122,.15); }.feature-icon { font-size:1.65rem; }.feature h3 { margin:14px 0 5px; font-size:1rem; }.feature p { margin:0; color:var(--muted); font-size:.86rem; }
+    .notice { display:flex; gap:17px; align-items:flex-start; padding:25px; border:1px solid #b9d9ff; border-radius:22px; color:#154278; background:linear-gradient(110deg,#eaf5ff,#f7fbff); }.notice-icon { display:grid; place-items:center; flex:none; width:34px; height:34px; border-radius:11px; background:#1265ce; color:white; font-weight:900; }.notice h2 { margin:0 0 5px; font-size:1.05rem; }.notice p { margin:0; }
+    .steps { display:grid; grid-template-columns:repeat(5,1fr); gap:13px; }.step { position:relative; min-height:164px; padding:20px; border-radius:19px; }.number { display:grid; place-items:center; width:30px; height:30px; margin-bottom:21px; border-radius:50%; color:white; background:var(--blue); font-size:.76rem; font-weight:900; }.step p { margin:0; font-size:.88rem; font-weight:700; line-height:1.45; }
+    .faq { max-width:800px; margin:auto; display:grid; gap:12px; }.faq details { padding:0 20px; border-radius:16px; }.faq summary { padding:18px 0; cursor:pointer; font-weight:800; }.faq p { margin:0; padding:0 0 18px; color:var(--muted); }
+    .download-card { display:flex; align-items:center; justify-content:space-between; gap:22px; padding:30px; border-radius:24px; background:linear-gradient(130deg,#0a4aa7,#0d6bd4); color:white; box-shadow:0 18px 38px rgba(4,58,143,.22); }.download-card h2 { margin:0; font-size:1.55rem; }.download-card p { margin:5px 0 0; color:#dbeeff; }.download-card .button { flex:none; background:white; color:#08458e; }
+    footer { margin-top:40px; padding:28px 20px; color:#71809a; background:#eef4fb; text-align:center; font-size:.85rem; }
+    .reveal { animation:fade-up .65s both; }.features .feature:nth-child(2), .steps .step:nth-child(2) { animation-delay:.08s; }.features .feature:nth-child(3), .steps .step:nth-child(3) { animation-delay:.16s; }.features .feature:nth-child(4), .steps .step:nth-child(4) { animation-delay:.24s; }.steps .step:nth-child(5) { animation-delay:.32s; }
+    @keyframes fade-up { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } } @keyframes float { 50% { transform:translateY(-14px) rotate(1.3deg); } }
+    @media (max-width:850px) { .hero { grid-template-columns:1fr; gap:20px; padding-top:28px; text-align:center; }.hero p { margin-inline:auto; }.actions,.meta { justify-content:center; }.phone-stage { min-height:410px; }.features { grid-template-columns:repeat(2,1fr); }.steps { grid-template-columns:repeat(3,1fr); } }
+    @media (max-width:540px) { .container { width:min(100% - 28px,1120px); }.nav-link { font-size:.82rem; }.hero { min-height:auto; padding-bottom:50px; }.phone { transform:scale(.88); }.phone-stage { min-height:370px; }.orb { width:300px; height:300px; }.features,.steps { grid-template-columns:1fr; }.section { padding:52px 0; }.step { min-height:auto; display:flex; align-items:center; gap:16px; }.number { flex:none; margin:0; }.download-card { align-items:flex-start; flex-direction:column; }.download-card .button { width:100%; } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms !important; scroll-behavior:auto !important; transition-duration:.01ms !important; } }
+  </style>
 </head>
 <body>
-
-  <div class="warning-mark">
-    <div class="icon-frame">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-        <path id="warning--01" d="M31,29.36H1c-0.128,0-0.248-0.069-0.312-0.181c-0.064-0.111-0.064-0.248,0-0.359l15-26
-          c0.129-0.224,0.495-0.224,0.624,0l15,26c0.064,0.111,0.064,0.248,0,0.359S31.129,29.36,31,29.36z M1.624,28.64h28.753L16,3.72
-          L1.624,28.64z M16.36,20h-0.72V10h0.72V20z M16,23c-0.552,0-1,0.448-1,1s0.448,1,1,1s1-0.448,1-1S16.552,23,16,23z"/>
-        <rect id="_Transparent_Rectangle" width="32" height="32"/>
-      </svg>
-    </div>
-  </div>
-
+  <header class="container nav"><a class="brand" href="/"><span class="brand-mark">J</span> JNTUA Attendance</a><a class="nav-link" href="/contact">Contact support</a></header>
   <main>
-    <div class="eyebrow">System status</div>
-    <h1>We're fixing a bug behind the scenes.</h1>
-    <p class="lead">
-      Dear Users, thank you for your valuable time with us. Currently, there is a significant bug
-      in our system, and our team is working day and night to resolve it as quickly as possible.
-    </p>
-
-    <div class="rule"></div>
-
-    <div class="cta-banner">
-      <div>
-        <h2>Stay tuned.</h2>
-        <p>We're currently developing an Android application for this website. We'll notify you as soon as the app is ready for release. Thank you for your patience and support!</p>
-      </div>
-    </div>
-
-    <!-- REACTION BAR -->
-
-
-    <div class="quote-block">
-      <div class="quote-mark">&ldquo;</div>
-      <blockquote>
-        If one Alluri Sitarama Raju falls, hundreds of Sitarama Rajus will be born.
-      </blockquote>
-      <div class="quote-attribution">Jale Chanikya</div>
-    </div>
-        <div class="reaction-block">
-      <div class="card-title">How do you feel about this?</div>
-      <div class="card-sub">Tap a reaction — you can change your mind anytime.</div>
-
-      <div class="reaction-row" id="reactionRow">
-        <button class="reaction-btn" data-type="like">
-          <span class="emoji">👍</span>
-          <span class="label">Like</span>
-          <span class="count" data-count="like">0</span>
-        </button>
-        <button class="reaction-btn" data-type="love">
-          <span class="emoji">❤️</span>
-          <span class="label">Love</span>
-          <span class="count" data-count="love">0</span>
-        </button>
-        <button class="reaction-btn" data-type="fire">
-          <span class="emoji">🔥</span>
-          <span class="label">Fire</span>
-          <span class="count" data-count="fire">0</span>
-        </button>
-        <button class="reaction-btn" data-type="laugh">
-          <span class="emoji">😂</span>
-          <span class="label">Laugh</span>
-          <span class="count" data-count="laugh">0</span>
-        </button>
-        <button class="reaction-btn" data-type="wow">
-          <span class="emoji">😮</span>
-          <span class="label">Wow</span>
-          <span class="count" data-count="wow">0</span>
-        </button>
-        <button class="reaction-btn" data-type="sad">
-          <span class="emoji">😢</span>
-          <span class="label">Sad</span>
-          <span class="count" data-count="sad">0</span>
-        </button>
-      </div>
-
-      <div class="reaction-note">One reaction per device. Click your reaction again to remove it.</div>
-    </div>
+    <section class="container hero">
+      <div class="reveal"><div class="eyebrow"><span></span> Android app now available</div><h1>JNTUA Attendance App is Now Available</h1><p>To ensure uninterrupted attendance access after recent security updates, we have launched an official Android application.</p><div class="actions"><a class="button primary" href="/downloads/JNTUA-Attendance-Application.apk" download>Download APK <span aria-hidden="true">↓</span></a><a class="button secondary" href="#installation">Installation Guide</a><a class="button secondary" href="/contact">Contact Support</a></div><div class="meta"><span>Version <strong>v1.0.0</strong></span><span>Platform <strong>Android 8.0+</strong></span><span>APK size <strong>{{ apk_size or 'Available on download' }}</strong></span><span>Downloads <strong id="downloadCount">0</strong></span></div></div>
+      <div class="phone-stage reveal"><div class="orb"></div><div class="phone" aria-label="JNTUA Attendance app preview"><div class="speaker"></div><div class="screen"><div class="app-title">JNTUA Attendance</div><div class="app-sub">Welcome back, student</div><div class="app-card"><small>OVERALL ATTENDANCE</small><div class="percent">82% <span>● Good standing</span></div><div class="progress"><i></i></div></div><div class="app-card"><small>SUBJECT-WISE ATTENDANCE</small><div class="subject"><span>Mathematics</span><b>86%</b></div><div class="subject"><span>Data Structures</span><b>80%</b></div><div class="subject"><span>Operating Systems</span><b>79%</b></div></div></div></div></div>
+    </section>
+    <section class="container"><div class="notice"><div class="notice-icon">!</div><div><h2>Important notice</h2><p>Due to recent security changes implemented on the JNTUA portal, attendance services are now accessible through the Android application.</p></div></div></section>
+    <section class="section" id="installation"><div class="container"><div class="section-heading"><h2>How to Install</h2><p>It only takes a minute to get started.</p></div><div class="steps"><article class="step glass reveal"><div class="number">1</div><p>Click the Download APK button.</p></article><article class="step glass reveal"><div class="number">2</div><p>If prompted, enable “Install from Unknown Sources”.</p></article><article class="step glass reveal"><div class="number">3</div><p>Open the downloaded APK file.</p></article><article class="step glass reveal"><div class="number">4</div><p>Install and launch the application.</p></article><article class="step glass reveal"><div class="number">5</div><p>Login using your JNTUA credentials.</p></article></div></div></section>
+    <section class="section"><div class="container"><div class="section-heading"><h2>Frequently asked questions</h2></div><div class="faq"><details class="glass"><summary>Is the app official?</summary><p>Yes, it is developed specifically for JNTUA students.</p></details><details class="glass"><summary>Is my data secure?</summary><p>Yes, credentials are securely transmitted and not stored unnecessarily.</p></details><details class="glass"><summary>Will the website return?</summary><p>Future web support updates will be announced.</p></details></div></div></section>
+    <section class="container"><div class="download-card"><div><h2>Ready to check your attendance?</h2><p>Download JNTUA Attendance App v1.0.0 for Android 8.0 and above.</p></div><a class="button" href="/downloads/JNTUA-Attendance-Application.apk" download>Download APK <span aria-hidden="true">↓</span></a></div></section>
   </main>
-
+  <footer>© 2026 JNTUA Attendance System | Developed for JNTUA Students</footer>
   <script>
-    (function () {
-      // ── Get/create a per-browser device id ──
-      function getDeviceId() {
-        var key = 'reaction_device_id';
-        var id = localStorage.getItem(key);
-        if (!id) {
-          id = (crypto.randomUUID ? crypto.randomUUID() :
-                'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                  var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-                  return v.toString(16);
-                }));
-          localStorage.setItem(key, id);
-        }
-        return id;
-      }
-
-      var deviceId = getDeviceId();
-      var row = document.getElementById('reactionRow');
-      var buttons = row.querySelectorAll('.reaction-btn');
-
-      function renderCounts(counts) {
-        buttons.forEach(function (btn) {
-          var type = btn.dataset.type;
-          var el = btn.querySelector('[data-count="' + type + '"]');
-          el.textContent = counts[type] != null ? counts[type] : 0;
-        });
-      }
-
-      function renderSelected(selected) {
-        buttons.forEach(function (btn) {
-          btn.classList.toggle('selected', btn.dataset.type === selected);
-        });
-      }
-
-      // ── Load current state ──
-      fetch('/api/reactions?device_id=' + encodeURIComponent(deviceId))
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-          renderCounts(data.counts || {});
-          renderSelected(data.selected || null);
-        })
-        .catch(function (err) { console.error('Failed to load reactions', err); });
-
-      // ── Handle clicks ──
-      buttons.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var type = btn.dataset.type;
-          var isSelected = btn.classList.contains('selected');
-          var newType = isSelected ? null : type; // click again to remove
-
-          buttons.forEach(function (b) { b.disabled = true; });
-
-          fetch('/api/react', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ device_id: deviceId, type: newType })
-          })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-              if (data.error) { console.error(data.error); return; }
-              renderCounts(data.counts || {});
-              renderSelected(data.selected || null);
-            })
-            .catch(function (err) { console.error('Failed to save reaction', err); })
-            .finally(function () {
-              buttons.forEach(function (b) { b.disabled = false; });
-            });
-        });
-      });
-    })();
+    (function () { var key = 'jntua_apk_downloads'; var count = Number(localStorage.getItem(key) || 0); var label = document.getElementById('downloadCount'); function render() { label.textContent = count + ' on this device'; } render(); document.querySelectorAll('a[download]').forEach(function (link) { link.addEventListener('click', function () { count += 1; localStorage.setItem(key, count); render(); }); }); }());
   </script>
-
 </body>
 </html>
